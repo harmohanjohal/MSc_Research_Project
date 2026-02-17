@@ -1,0 +1,736 @@
+Version,
+  25.1;                                   !- Version Identifier
+
+Timestep,
+  6;                                      !- Number of Timesteps per Hour
+
+RunPeriod,
+  Run Period 1,                           !- Name
+  1,                                      !- Begin Month
+  1,                                      !- Begin Day of Month
+  2023,                                   !- Begin Year
+  12,                                     !- End Month
+  31,                                     !- End Day of Month
+  2023,                                   !- End Year
+  Wednesday,                              !- Day of Week for Start Day
+  Yes,                                     !- Use Weather File Holidays and Special Days
+  Yes,                                     !- Use Weather File Daylight Saving Period
+  No,                                     !- Apply Weekend Holiday Rule
+  Yes,                                    !- Use Weather File Rain Indicators
+  Yes;                                    !- Use Weather File Snow Indicators
+
+SimulationControl,
+  No,                                     !- Do Zone Sizing Calculation
+  No,                                     !- Do System Sizing Calculation
+  No,                                     !- Do Plant Sizing Calculation
+  Yes,                                    !- Run Simulation for Sizing Periods
+  Yes,                                    !- Run Simulation for Weather File Run Periods
+  ,                                       !- Do HVAC Sizing Simulation for Sizing Periods
+  ;                                       !- Maximum Number of HVAC Sizing Simulation Passes
+
+Building,
+  Semi_Detached,                        !- Name
+  0,                                      !- North Axis {deg}
+  ,                                       !- Terrain
+  0.04,                                   !- Loads Convergence Tolerance Value
+  0.4,                                    !- Temperature Convergence Tolerance Value {deltaC}
+  FullExterior,                           !- Solar Distribution
+  25;                                     !- Maximum Number of Warmup Days
+
+GlobalGeometryRules,
+  UpperLeftCorner,                        !- Starting Vertex Position
+  Counterclockwise,                       !- Vertex Entry Direction
+  Relative,                               !- Coordinate System
+  Relative,                               !- Daylighting Reference Point Coordinate System
+  Relative;                               !- Rectangular Surface Coordinate System
+
+Material,
+  Brick,                                  !- Name
+  MediumRough,                            !- Roughness
+  0.1,                                    !- Thickness {m}
+  0.77,                                   !- Conductivity {W/m-K}
+  1920,                                   !- Density {kg/m3}
+  790,                                    !- Specific Heat {J/kg-K}
+  0.9,                                    !- Thermal Absorptance
+  0.7,                                    !- Solar Absorptance
+  0.7;                                    !- Visible Absorptance
+
+Material,
+  Insulation,                             !- Name
+  MediumRough,                            !- Roughness
+  0.05,                                   !- Thickness {m} - 1970s basic
+  0.04,                                   !- Conductivity {W/m-K}
+  35,                                     !- Density {kg/m3}
+  1030,                                   !- Specific Heat {J/kg-K}
+  0.9,                                    !- Thermal Absorptance
+  0.7,                                    !- Solar Absorptance
+  0.7;                                    !- Visible Absorptance
+
+Material,
+  Concrete,                               !- Name
+  MediumRough,                            !- Roughness
+  0.15,                                   !- Thickness {m}
+  1.4,                                    !- Conductivity {W/m-K}
+  2300,                                   !- Density {kg/m3}
+  1000,                                   !- Specific Heat {J/kg-K}
+  0.9,                                    !- Thermal Absorptance
+  0.7,                                    !- Solar Absorptance
+  0.7;                                    !- Visible Absorptance
+
+Material,
+  ClayTiles,                              !- Name
+  Rough,                                  !- Roughness
+  0.020,                                  !- Thickness {m}
+  1.30,                                   !- Conductivity {W/m-K}
+  1920,                                   !- Density {kg/m3}
+  840;                                    !- Specific Heat {J/kg-K}
+
+Material,
+  Roof_MW200,                             !- Name
+  MediumRough,                            !- Roughness
+  0.075,                                  !- Thickness {m} - 1970s basic
+  0.022,                                  !- Conductivity {W/m-K}
+  35,                                     !- Density {kg/m3}
+  1030;                                   !- Specific Heat {J/kg-K}
+
+Material,
+  Plasterboard,                           !- Name
+  Smooth,                                 !- Roughness
+  0.013,                                  !- Thickness {m}
+  0.16,                                   !- Conductivity {W/m-K}
+  950,                                    !- Density {kg/m3}
+  840;                                    !- Specific Heat {J/kg-K}
+
+WindowMaterial:Glazing,
+  ClearGlass,                             !- Name
+  SpectralAverage,                        !- Optical Data Type
+  ,                                       !- Window Glass Spectral Data Set Name
+  0.003,                                  !- Thickness {m}
+  0.9,                                    !- Solar Transmittance at Normal Incidence
+  0.1,                                    !- Front Side Solar Reflectance at Normal Incidence
+  0.1,                                    !- Back Side Solar Reflectance at Normal Incidence
+  0.9,                                    !- Visible Transmittance at Normal Incidence
+  0.1,                                    !- Front Side Visible Reflectance at Normal Incidence
+  0.1,                                    !- Back Side Visible Reflectance at Normal Incidence
+  0.0,                                    !- Infrared Transmittance at Normal Incidence
+  0.84,                                   !- Front Side Infrared Hemispherical Emissivity
+  0.84,                                   !- Back Side Infrared Hemispherical Emissivity
+  1.0;                                    !- Conductivity {W/m-K}
+
+Construction,
+  WallConstruction,                       !- Name
+  Brick,                                  !- Outside Layer
+  Insulation,                             !- Layer 2
+  Concrete;                               !- Layer 3
+
+Construction,
+  WindowConstruction,                     !- Name
+  ClearGlass;                             !- Single glazing only
+
+Construction,
+  FloorConstruction,                      !- Name
+  Concrete,                               !- Outside Layer
+  Insulation;                             !- Layer 2
+
+Construction,
+  RoofConstruction,                       !- Name
+  ClayTiles,                              !- Outside Layer
+  Roof_MW200,                             !- Layer 2
+  Plasterboard;                           !- Layer 3
+
+Zone,
+  MainZone,                               !- Name
+  0,                                      !- Direction of Relative North {deg}
+  0,                                      !- X Origin {m}
+  0,                                      !- Y Origin {m}
+  0,                                      !- Z Origin {m}
+  ,                                       !- Type
+  1,                                      !- Multiplier
+  5.5,                                    !- Ceiling Height {m}
+  316,                                    !- Volume {m3}
+  144,                                    !- Floor Area {m2}
+  ,                                       !- Zone Inside Convection Algorithm
+  ,                                       !- Zone Outside Convection Algorithm
+  Yes;                                    !- Part of Total Floor Area
+
+BuildingSurface:Detailed,
+  Wall1,                                  !- Name
+  Wall,                                   !- Surface Type
+  WallConstruction,                       !- Construction Name
+  MainZone,                               !- Zone Name
+  ,                                       !- Space Name
+  Outdoors,                               !- Outside Boundary Condition
+  ,                                       !- Outside Boundary Condition Object
+  SunExposed,                             !- Sun Exposure
+  WindExposed,                            !- Wind Exposure
+  ,                                       !- View Factor to Ground
+  4,                                      !- Number of Surface Vertices
+  0,0,0,                                  !- X,Y,Z ==> Vertex 1 {m}
+  12,0,0,                                  !- X,Y,Z ==> Vertex 2 {m}
+  12,0,5.5,                                !- X,Y,Z ==> Vertex 3 {m}
+  0,0,5.5;                                 !- X,Y,Z ==> Vertex 4 {m}
+
+BuildingSurface:Detailed,
+  Wall2,                                  !- Name
+  Wall,                                   !- Surface Type
+  WallConstruction,                       !- Construction Name
+  MainZone,                               !- Zone Name
+  ,                                       !- Space Name
+  Outdoors,                               !- Outside Boundary Condition
+  ,                                       !- Outside Boundary Condition Object
+  SunExposed,                             !- Sun Exposure
+  WindExposed,                            !- Wind Exposure
+  ,                                       !- View Factor to Ground
+  4,                                      !- Number of Surface Vertices
+  12,0,0,                                 !- X,Y,Z ==> Vertex 1 {m}
+  12,12,0,                                 !- X,Y,Z ==> Vertex 2 {m}
+  12,12,5.5,                               !- X,Y,Z ==> Vertex 3 {m}
+  12,0,5.5;                               !- X,Y,Z ==> Vertex 4 {m}
+
+BuildingSurface:Detailed,
+  Wall3,                                  !- Name
+  Wall,                                   !- Surface Type
+  WallConstruction,                       !- Construction Name
+  MainZone,                               !- Zone Name
+  ,                                       !- Space Name
+  Outdoors,                               !- Outside Boundary Condition
+  ,                                       !- Outside Boundary Condition Object
+  SunExposed,                             !- Sun Exposure
+  WindExposed,                            !- Wind Exposure
+  ,                                       !- View Factor to Ground
+  4,                                      !- Number of Surface Vertices
+  12,12,0,                                 !- X,Y,Z ==> Vertex 1 {m}
+  0,12,0,                                  !- X,Y,Z ==> Vertex 2 {m}
+  0,12,5.5,                                !- X,Y,Z ==> Vertex 3 {m}
+  12,12,5.5;                               !- X,Y,Z ==> Vertex 4 {m}
+
+BuildingSurface:Detailed,
+  Wall4,                                  !- Name
+  Wall,                                   !- Surface Type
+  WallConstruction,                       !- Construction Name
+  MainZone,                               !- Zone Name
+  ,                                       !- Space Name
+  Adiabatic,                              !- Outside Boundary Condition
+  ,                                       !- Outside Boundary Condition Object
+  NoSun,                                  !- Sun Exposure
+  NoWind,                                 !- Wind Exposure
+  ,                                       !- View Factor to Ground
+  4,                                      !- Number of Surface Vertices
+  0,12,0,                                  !- X,Y,Z ==> Vertex 1 {m}
+  0,0,0,                                  !- X,Y,Z ==> Vertex 2 {m}
+  0,0,5.5,                                !- X,Y,Z ==> Vertex 3 {m}
+  0,12,5.5;                                !- X,Y,Z ==> Vertex 4 {m}
+
+BuildingSurface:Detailed,
+  Floor,                                  !- Name
+  Floor,                                  !- Surface Type
+  FloorConstruction,                      !- Construction Name
+  MainZone,                               !- Zone Name
+  ,                                       !- Space Name
+  Ground,                                 !- Outside Boundary Condition
+  ,                                       !- Outside Boundary Condition Object
+  NoSun,                                  !- Sun Exposure
+  NoWind,                                 !- Wind Exposure
+  ,                                       !- View Factor to Ground
+  4,                                      !- Number of Surface Vertices
+  0,0,0,                                  !- X,Y,Z ==> Vertex 1 {m}
+  12,0,0,                                  !- X,Y,Z ==> Vertex 2 {m}
+  12,12,0,                                  !- X,Y,Z ==> Vertex 3 {m}
+  0,12,0;                                  !- X,Y,Z ==> Vertex 4 {m}
+
+BuildingSurface:Detailed,
+  Ceiling,                                !- Name
+  Ceiling,                                !- Surface Type
+  RoofConstruction,                        !- Construction Name
+  MainZone,                               !- Zone Name
+  ,                                       !- Space Name
+  Outdoors,                               !- Outside Boundary Condition
+  ,                                       !- Outside Boundary Condition Object
+  SunExposed,                             !- Sun Exposure
+  WindExposed,                            !- Wind Exposure
+  ,                                       !- View Factor to Ground
+  4,                                      !- Number of Surface Vertices
+  0,0,5.5,                           !- X,Y,Z ==> Vertex 1 {m}
+  12,0,5.5,                                !- X,Y,Z ==> Vertex 2 {m}
+  12,12,5.5,                               !- X,Y,Z ==> Vertex 3 {m}
+  0,12,5.5;                                !- X,Y,Z ==> Vertex 4 {m}
+
+FenestrationSurface:Detailed,
+  Window1,                                !- Name
+  Window,                                 !- Surface Type
+  WindowConstruction,                     !- Construction Name
+  Wall1,                                  !- Building Surface Name
+  0.5,                                    !- View Factor to Ground
+  ,                                       !- Shading Control Name
+  ,                                       !- Frame and Divider Name
+  1,                                      !- Multiplier
+  4,                                      !- Number of Vertices
+  1.0,0,1.0,                              !- X,Y,Z ==> Vertex 1 {m}
+  8.0,0,1.0,                              !- X,Y,Z ==> Vertex 2 {m}
+  8.0,0,1.8,                              !- X,Y,Z ==> Vertex 3 {m}
+  1.0,0,1.8;                              !- X,Y,Z ==> Vertex 4 {m}
+
+Schedule:Constant,
+  Always On Discrete,                     !- Name
+  OnOff,                                  !- Schedule Type Limits Name
+  1;                                      !- Hourly Value
+
+Schedule:Constant,
+  Always Off Discrete,                    !- Name
+  OnOff 1,                                !- Schedule Type Limits Name
+  0;                                      !- Hourly Value
+
+Schedule:Constant,
+  Always On Continuous,                   !- Name
+  Fractional,                             !- Schedule Type Limits Name
+  1;                                      !- Hourly Value
+
+ScheduleTypeLimits,
+  Fraction,                               !- Name
+  ,                                       !- Lower Limit Value {BasedOnField A3}
+  ,                                       !- Upper Limit Value {BasedOnField A3}
+  ,                                       !- Numeric Type
+  dimensionless;                          !- Unit Type
+
+ScheduleTypeLimits,
+  Fractional,                             !- Name
+  0,                                      !- Lower Limit Value {BasedOnField A3}
+  1,                                      !- Upper Limit Value {BasedOnField A3}
+  Continuous;                             !- Numeric Type
+
+ScheduleTypeLimits,
+  OnOff,                                  !- Name
+  0,                                      !- Lower Limit Value {BasedOnField A3}
+  1,                                      !- Upper Limit Value {BasedOnField A3}
+  Discrete,                               !- Numeric Type
+  availability;                           !- Unit Type
+
+ScheduleTypeLimits,
+  OnOff 1,                                !- Name
+  0,                                      !- Lower Limit Value {BasedOnField A3}
+  1,                                      !- Upper Limit Value {BasedOnField A3}
+  Discrete,                               !- Numeric Type
+  availability;                           !- Unit Type
+
+ScheduleTypeLimits,
+  Temperature;                            !- Name
+
+Schedule:Day:Interval,
+  HeatingDay,                             !- Name
+  Temperature,                            !- Schedule Type Limits Name
+  No,                                     !- Interpolate to Timestep
+  07:00,                                  !- Time 1 {hh:mm}
+  21,                                     !- Value Until Time 1
+  23:00,                                  !- Time 2 {hh:mm}
+  16,                                     !- Value Until Time 2
+  24:00,                                  !- Time 3 {hh:mm}
+  21;                                     !- Value Until Time 3
+
+Schedule:Week:Daily,
+  HeatingWeek,                            !- Name
+  HeatingDay,                             !- Sunday Schedule:Day Name
+  HeatingDay,                             !- Monday Schedule:Day Name
+  HeatingDay,                             !- Tuesday Schedule:Day Name
+  HeatingDay,                             !- Wednesday Schedule:Day Name
+  HeatingDay,                             !- Thursday Schedule:Day Name
+  HeatingDay,                             !- Friday Schedule:Day Name
+  HeatingDay,                             !- Saturday Schedule:Day Name
+  HeatingDay,                             !- Holiday Schedule:Day Name
+  HeatingDay,                             !- SummerDesignDay Schedule:Day Name
+  HeatingDay,                             !- WinterDesignDay Schedule:Day Name
+  HeatingDay,                             !- CustomDay1 Schedule:Day Name
+  HeatingDay;                             !- CustomDay2 Schedule:Day Name
+
+Schedule:Year,
+  HeatingSchedule,                        !- Name
+  Temperature,                            !- Schedule Type Limits Name
+  HeatingWeek,                            !- Schedule:Week Name 1
+  1,                                      !- Start Month 1
+  1,                                      !- Start Day 1
+  12,                                     !- End Month 1
+  31;                                     !- End Day 1
+
+ZoneControl:Thermostat,
+  MainZone Thermostat,                    !- Name
+  MainZone,                               !- Zone or ZoneList Name
+  Always On Discrete,                     !- Control Type Schedule Name
+  ThermostatSetpoint:SingleHeating,       !- Control 1 Object Type
+  MainZone Heating Setpoint,              !- Control 1 Name
+  ,                                       !- Control 2 Object Type
+  ,                                       !- Control 2 Name
+  ,                                       !- Control 3 Object Type
+  ,                                       !- Control 3 Name
+  ,                                       !- Control 4 Object Type
+  ;                                       !- Control 4 Name
+
+ThermostatSetpoint:SingleHeating,
+  MainZone Heating Setpoint,              !- Name
+  HeatingSchedule;                        !- Setpoint Temperature Schedule Name
+
+ZoneHVAC:EquipmentList,
+  MainZone Equipment,                     !- Name
+  SequentialLoad,                         !- Load Distribution Scheme
+  ZoneHVAC:Baseboard:Convective:Water,    !- Zone Equipment 1 Object Type
+  MainZone Baseboard,                     !- Zone Equipment 1 Name
+  1,                                      !- Zone Equipment 1 Cooling Sequence
+  1;                                      !- Zone Equipment 1 Heating or No-Load Sequence
+
+ZoneHVAC:EquipmentConnections,
+  MainZone,                               !- Zone Name
+  MainZone Equipment,                     !- Zone Conditioning Equipment List Name
+  ,                                       !- Zone Air Inlet Node or NodeList Name
+  ,                                       !- Zone Air Exhaust Node or NodeList Name
+  MainZone Air Node,                      !- Zone Air Node Name
+  ;                                       !- Zone Return Air Node or NodeList Name
+
+ZoneHVAC:Baseboard:Convective:Water,
+  MainZone Baseboard,
+  Always On Discrete,
+  District Heating Demand Inlet Pipe Outlet Node,
+  District Heating Demand Outlet Pipe Inlet Node,
+  HeatingDesignCapacity,
+  15000,                                  !- Heating Design Capacity {W} - 15kW typical for 1970s semi
+  ,
+  1200,                                   !- U-Factor Times Area Value {W/K} - scaled with capacity
+  0.0018,                                 !- Maximum Water Flow Rate {m3/s} - scaled with capacity
+  0.002;
+
+Output:VariableDictionary,
+  IDF;
+
+Output:SQLite,
+  SimpleAndTabular;                       !- Option Type
+
+Output:Table:SummaryReports,
+  AllSummary;                             !- Report Name 1
+
+PlantEquipmentOperationSchemes,
+  District Heating Loop Operation,
+  PlantEquipmentOperation:HeatingLoad,
+  District Heating Loop Control,
+  Always On Discrete;
+
+PlantEquipmentOperation:HeatingLoad,
+  District Heating Loop Control,
+  0,
+  18000,
+  District Heating Equipment List;
+
+PlantEquipmentList,
+  District Heating Equipment List,
+  PlantComponent:TemperatureSource,
+  District Heating Source;
+
+PlantLoop,
+  District Heating Loop,
+  Water,
+  ,
+  District Heating Loop Operation,
+  District Heating Supply Outlet Node,
+  85,
+  60,
+  0.0018,                                 !- Maximum Loop Flow Rate {m3/s}
+  0,
+  0.1,
+  District Heating Supply Inlet Node,
+  District Heating Supply Outlet Node,
+  District Heating Supply Branches,
+  ,
+  District Heating Demand Inlet Node,
+  District Heating Demand Outlet Node,
+  District Heating Demand Branches,
+  ,
+  Optimal;
+
+BranchList,
+  District Heating Supply Branches,
+  District Heating Supply Branch;
+
+Branch,
+  District Heating Supply Branch,
+  ,
+  Pump:ConstantSpeed,
+  District Heating Pump,
+  District Heating Supply Inlet Node,
+  District Heating Supply Pump Outlet Node,
+  PlantComponent:TemperatureSource,
+  District Heating Source,
+  District Heating Supply Pump Outlet Node,
+  District Heating Supply Outlet Node;
+
+BranchList,
+  District Heating Demand Branches,
+  District Heating Demand Branch;
+
+Branch,
+  District Heating Demand Branch,
+  ,
+  Pipe:Adiabatic,
+  District Heating Demand Inlet Pipe,
+  District Heating Demand Inlet Node,
+  District Heating Demand Inlet Pipe Outlet Node,
+  ZoneHVAC:Baseboard:Convective:Water,
+  MainZone Baseboard,
+  District Heating Demand Inlet Pipe Outlet Node,
+  District Heating Demand Outlet Pipe Inlet Node,
+  Pipe:Adiabatic,
+  District Heating Demand Outlet Pipe,
+  District Heating Demand Outlet Pipe Inlet Node,
+  District Heating Demand Outlet Node;
+
+Pump:ConstantSpeed,
+  District Heating Pump,
+  District Heating Supply Inlet Node,
+  District Heating Supply Pump Outlet Node,
+  0.0018,                                 !- Design Flow Rate {m3/s}
+  30000,
+  110,                                    !- Design Power Consumption {W}
+  0.9,
+  0,
+  Intermittent;
+
+PlantComponent:TemperatureSource,
+  District Heating Source,          !- Name
+  District Heating Supply Pump Outlet Node, !- Inlet Node Name
+  District Heating Supply Outlet Node,      !- Outlet Node Name
+  0.0018,                          !- Design Volume Flow Rate {m3/s}
+  Constant,                          !- Temperature Specification Type
+  70;                                !- Source Temperature {C}
+
+Pipe:Adiabatic,
+  District Heating Demand Inlet Pipe,
+  District Heating Demand Inlet Node,
+  District Heating Demand Inlet Pipe Outlet Node;
+
+Pipe:Adiabatic,
+  District Heating Demand Outlet Pipe,
+  District Heating Demand Outlet Pipe Inlet Node,
+  District Heating Demand Outlet Node;
+
+SetpointManager:Scheduled,
+  District Heating Setpoint Manager,
+  Temperature,
+  DistrictHeatingSetpointSched,
+  District Heating Supply Outlet Node;
+
+SetpointManager:Scheduled,
+  District Heating Inlet Setpoint Manager,
+  Temperature,
+  DistrictHeatingSetpointSched,
+  District Heating Supply Inlet Node;
+
+NodeList,
+  MainZone Air Node,
+  MainZone;
+
+ScheduleTypeLimits,
+  AnyNumber;
+
+Schedule:Constant,
+  DistrictHeatingSetpointSched,
+  Temperature,
+  70;
+
+Schedule:Constant,
+  OccupancySchedule,
+  Fractional,
+  1;
+
+Schedule:Constant,
+  ActivitySchedule,
+  AnyNumber,
+  120;
+
+Schedule:Day:Interval,
+  LightingDay,                            !- Name
+  Fractional,                             !- Schedule Type Limits Name
+  No,                                     !- Interpolate to Timestep
+  06:00,                                  !- Time 1 {hh:mm}
+  0.1,                                    !- Value Until Time 1 (night - minimal)
+  08:00,                                  !- Time 2 {hh:mm}
+  0.3,                                    !- Value Until Time 2 (morning)
+  16:00,                                  !- Time 3 {hh:mm}
+  0.2,                                    !- Value Until Time 3 (day - natural light)
+  18:00,                                  !- Time 4 {hh:mm}
+  0.6,                                    !- Value Until Time 4 (evening peak)
+  23:00,                                  !- Time 5 {hh:mm}
+  0.4,                                    !- Value Until Time 5 (evening)
+  24:00,                                  !- Time 6 {hh:mm}
+  0.1;                                    !- Value Until Time 6 (night)
+
+Schedule:Week:Daily,
+  LightingWeek,                           !- Name
+  LightingDay,                            !- Sunday Schedule:Day Name
+  LightingDay,                            !- Monday Schedule:Day Name
+  LightingDay,                            !- Tuesday Schedule:Day Name
+  LightingDay,                            !- Wednesday Schedule:Day Name
+  LightingDay,                            !- Thursday Schedule:Day Name
+  LightingDay,                            !- Friday Schedule:Day Name
+  LightingDay,                            !- Saturday Schedule:Day Name
+  LightingDay,                            !- Holiday Schedule:Day Name
+  LightingDay,                            !- SummerDesignDay Schedule:Day Name
+  LightingDay,                            !- WinterDesignDay Schedule:Day Name
+  LightingDay,                            !- CustomDay1 Schedule:Day Name
+  LightingDay;                            !- CustomDay2 Schedule:Day Name
+
+Schedule:Year,
+  LightingSchedule,                       !- Name
+  Fractional,                             !- Schedule Type Limits Name
+  LightingWeek,                           !- Schedule:Week Name 1
+  1,                                      !- Start Month 1
+  1,                                      !- Start Day 1
+  12,                                     !- End Month 1
+  31;                                     !- End Day 1
+
+Schedule:Day:Interval,
+  EquipmentDay,                           !- Name
+  Fractional,                             !- Schedule Type Limits Name
+  No,                                     !- Interpolate to Timestep
+  07:00,                                  !- Time 1 {hh:mm}
+  0.3,                                    !- Value Until Time 1 (morning)
+  12:00,                                  !- Time 2 {hh:mm}
+  0.5,                                    !- Value Until Time 2 (day)
+  18:00,                                  !- Time 3 {hh:mm}
+  0.8,                                    !- Value Until Time 3 (evening peak)
+  23:00,                                  !- Time 4 {hh:mm}
+  0.6,                                    !- Value Until Time 4 (evening)
+  24:00,                                  !- Time 5 {hh:mm}
+  0.3;                                    !- Value Until Time 5 (night)
+
+Schedule:Week:Daily,
+  EquipmentWeek,                          !- Name
+  EquipmentDay,                           !- Sunday Schedule:Day Name
+  EquipmentDay,                           !- Monday Schedule:Day Name
+  EquipmentDay,                           !- Tuesday Schedule:Day Name
+  EquipmentDay,                           !- Wednesday Schedule:Day Name
+  EquipmentDay,                           !- Thursday Schedule:Day Name
+  EquipmentDay,                           !- Friday Schedule:Day Name
+  EquipmentDay,                           !- Saturday Schedule:Day Name
+  EquipmentDay,                           !- Holiday Schedule:Day Name
+  EquipmentDay,                           !- SummerDesignDay Schedule:Day Name
+  EquipmentDay,                           !- WinterDesignDay Schedule:Day Name
+  EquipmentDay,                           !- CustomDay1 Schedule:Day Name
+  EquipmentDay;                           !- CustomDay2 Schedule:Day Name
+
+Schedule:Year,
+  EquipmentSchedule,                      !- Name
+  Fractional,                             !- Schedule Type Limits Name
+  EquipmentWeek,                          !- Schedule:Week Name 1
+  1,                                      !- Start Month 1
+  1,                                      !- Start Day 1
+  12,                                     !- End Month 1
+  31;                                     !- End Day 1
+
+People,
+  MainZone People,
+  MainZone,
+  OccupancySchedule,
+  People,
+  4,
+  ,
+  ,
+  0.3,
+  ,
+  ActivitySchedule;
+
+Lights,
+  MainZone Lights,
+  MainZone,
+  LightingSchedule,
+  LightingLevel,
+  576;                                    !- Lighting Level {W} - 4 W/m² realistic
+
+ElectricEquipment,
+  MainZone Equipment,
+  MainZone,
+  EquipmentSchedule,
+  EquipmentLevel,
+  864;                                    !- Equipment Level {W} - 6 W/m² realistic
+
+ZoneInfiltration:DesignFlowRate,
+  MainZone Infiltration,
+  MainZone,
+  Always On Continuous,
+  AirChanges/Hour,
+  ,
+  ,
+  ,
+  1.5,                                    !- Air Changes per Hour - 1970s typical
+  1,0,0,0;
+
+Output:Variable,
+  *,
+  Plant Supply Side Heating Demand Rate,
+  Hourly;
+
+Output:Variable,
+  *,
+  Zone Air Temperature,
+  Hourly;
+
+Output:Variable,
+  *,
+  Plant Supply Side Inlet Mass Flow Rate,
+  Hourly;
+
+Output:Variable,
+  *,
+  Plant Supply Side Outlet Temperature,
+  Hourly;
+
+Output:Variable,
+  *,
+  Baseboard Total Heating Rate,
+  Hourly;
+
+Output:Variable,
+  *,
+  Baseboard Hot Water Energy,
+  Hourly;
+
+Output:Variable,
+  *,
+  Pump Electricity Rate,
+  Hourly;
+
+! ------------------------------------------------------------------------------
+! Added for proper sizing and design-day generation
+
+Sizing:Parameters,
+  1.1,                                    !- Heating Sizing Factor (10% oversize)
+  1.0;                                    !- Cooling Sizing Factor
+
+SizingPeriod:WeatherFileConditionType,
+  Extreme Winter Weather,                 !- Name
+  WinterExtreme,                          !- Period Selection
+  WinterDesignDay,                        !- Day of Week for Start Day
+  No,                                     !- Use Weather File Daylight Saving Period
+  No;                                     !- Use Weather File Rain and Snow Indicators
+
+SizingPeriod:WeatherFileConditionType,
+  Extreme Summer Weather,                 !- Name
+  SummerExtreme,                          !- Period Selection
+  SummerDesignDay,                        !- Day of Week for Start Day
+  No,                                     !- Use Weather File Daylight Saving Period
+  No;                                     !- Use Weather File Rain and Snow Indicators
+
+Sizing:Zone,
+  MainZone,
+  SupplyAirTemperature,
+  14.0,
+  ,
+  SupplyAirTemperature,
+  50.0,
+  ,
+  0.0085,
+  0.008,
+  ,
+  1.0,
+  1.0;
+
+Sizing:Plant,
+  District Heating Loop,
+  Heating,
+  60,
+  5;
+

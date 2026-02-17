@@ -1,0 +1,68 @@
+{
+  "model_type": "CatBoost",
+  "feature_names": [
+    "outdoor_temp_synthetic",
+    "hdh",
+    "hour",
+    "day_of_week",
+    "month",
+    "is_weekend",
+    "outdoor_temp_lag_1",
+    "outdoor_temp_lag_2",
+    "outdoor_temp_lag_3",
+    "outdoor_temp_diff_1",
+    "outdoor_temp_diff_2"
+  ],
+  "feature_count": 11,
+  "training_date": "2025-01-15T14:30:00Z",
+  "performance": {
+    "mae": 1.44,
+    "rmse": 2.11,
+    "demand_range_min": 0.0,
+    "demand_range_max": 15.0,
+    "demand_mean": 3.42,
+    "training_samples": 4365
+  },
+  "feature_importance": {
+    "outdoor_temp_synthetic": 254.0,
+    "hdh": 34.0,
+    "hour": 492.0,
+    "day_of_week": 174.0,
+    "month": 265.0,
+    "is_weekend": 0.0,
+    "outdoor_temp_lag_1": 252.0,
+    "outdoor_temp_lag_2": 315.0,
+    "outdoor_temp_lag_3": 339.0,
+    "outdoor_temp_diff_1": 252.0,
+    "outdoor_temp_diff_2": 280.0
+  },
+  "scaler_info": {
+    "type": "RobustScaler",
+    "center": [
+      14.84313235481072,
+      2.15686764518928,
+      12.0,
+      3.0,
+      3.0,
+      0.0,
+      14.84313235481072,
+      14.84313235481072,
+      14.83117210875698,
+      -0.02060018840275113,
+      -0.043297657776761866
+    ],
+    "scale": [
+      10.876566938351713,
+      7.5322233435044215,
+      12.0,
+      4.0,
+      9.0,
+      1.0,
+      10.880052027747341,
+      10.880052027747341,
+      10.884227842841579,
+      3.9410858854512885,
+      4.166991278380559
+    ]
+  }
+}

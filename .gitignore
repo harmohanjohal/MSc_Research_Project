@@ -1,0 +1,282 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Node.js and JS/TS
+node_modules/
+heat-dashboard/node_modules/
+heat-dashboard/.next/
+heat-dashboard/.out/
+heat-dashboard/.vercel/
+heat-dashboard/build/
+heat-dashboard/*.tsbuildinfo
+heat-dashboard/next-env.d.ts
+heat-dashboard/.env*
+
+# Root-level virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IDE/project files
+.idea/
+.vscode/
+.cursor/
+
+# EnergyPlus and simulation output files (large/binary)
+*.eso
+*.sql
+*.audit
+*.bnd
+*.dbg
+*.eio
+*.mdd
+*.mtd
+*.rdd
+*.rvaudit
+*.shd
+*.svg
+*.Table.csv
+*.Zsz.csv
+*.err
+*.xml
+*.gbxml
+
+# CSV files (exclude most, but allow important ones)
+*.csv
+!data/processed/*.csv
+!building_data/processed/*.csv
+!data/processed/features/*.parquet
+!data/processed/raw/*.feather
+!redundant/extra/training-scripts/ml_training/prediction_results.csv
+!redundant/extra/training-scripts/ml_training/tuned_model_results.csv
+!redundant/extra/training-scripts/ml_training/clean_model_results.csv
+!redundant/extra/training-scripts/ml_training/quick_model_results.csv
+!redundant/extra/training-scripts/ml_training/top10_models_results.csv
+!redundant/extra/training-scripts/ml_training/best_hyperparameters_by_season.csv
+!redundant/extra/training-scripts/ml_training/seasonal_hyperparameter_tuning_results.csv
+!redundant/extra/training-scripts/ml_training/training_methods_comparison.csv
+!redundant/extra/training-scripts/ml_training/seasonal_split_results.csv
+!redundant/extra/training-scripts/ml_training/time_series_split_results.csv
+
+# Log files
+*.log
+logs/
+heat_demand_pipeline.log
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Pipeline and results (regenerated)
+pipeline_output/
+results/
+
+# Weather data (large, can be regenerated)
+weather/
+
+# Data files (optional - uncomment if you don't want to track large data files)
+# *.csv
+# *.xlsx
+# *.json
+
+# Project-specific exclusions for submission
+# Redundant and development files
+redundant/
+archive/
+extra/
+py scripts/
+scripts/
+Implementation docs/
+
+# Development and temporary files
+*.log
+production_model.log
+complete_setup.py
+check_model.py
+t_new_structure.py
+test_new_structure.py
+setup_project.py
+test_api.py
+
+# Allow important training scripts
+!src/ml/training/*.py
+!redundant/py scripts/train_clean_models.py
+!redundant/py scripts/production_catboost_model.py
+!redundant/py scripts/hyperparameter_tuning.py
+!redundant/py scripts/model_screening.py
+!redundant/py scripts/feature_engineering.py
+!redundant/py scripts/data_preparation.py
+!redundant/py scripts/predict_with_production_model.py
+!redundant/py scripts/api_backend.py
+!redundant/extra/heat_demand_ml_training.py
+!redundant/extra/save_model_for_api.py
+!redundant/extra/setup_backend.py
+!redundant/extra/manual_setup.py
+!redundant/extra/training-scripts/heat_demand_training_cells.py
+!redundant/extra/training-scripts/ml_training/simple_hyperparameter_tuning.py
+!redundant/extra/training-scripts/ml_training/hyperparameter_tuning_robust.py
+!redundant/extra/training-scripts/ml_training/hyperparameter_tuning_gpu.py
+!redundant/extra/training-scripts/ml_training/two_stage_modeling.py
+!redundant/extra/training-scripts/ml_training/quick_model_comparison.py
+!redundant/extra/training-scripts/ml_training/comprehensive_model_comparison.py
+!redundant/extra/training-scripts/ml_training/final_model_comparison.py
+!redundant/extra/training-scripts/ml_training/train_top10_then_tune.py
+!redundant/extra/training-scripts/ml_training/train_winter_models.py
+!redundant/extra/training-scripts/ml_training/seasonal_hyperparameter_tuning.py
+!redundant/extra/training-scripts/ml_training/train_seasonal_split.py
+!redundant/extra/training-scripts/ml_training/train_time_series_split.py
+!redundant/extra/training-scripts/ml_training/clean_dataset.py
+!redundant/extra/training-scripts/ml_training/dataset_analysis_and_cleanup.py
+!redundant/extra/training-scripts/ml_training/create_combined_dataset.py
+!redundant/extra/pipeline-dev/pipeline/main_pipeline.py
+!redundant/extra/pipeline-dev/pipeline/config.py
+
+# Documentation files (moved to redundant)
+*.md
+!README.md
+!apps/*/README.md
+!data/README.md
+!building_data/README.md
+!config/README.md
+!src/README.md
+
+# Large data files that can be regenerated
+building_data/outputs/
+building_data/models/*/merged csv/
+data/raw/miscellaneous/
+
+# Allow important model files and configurations
+!redundant/py scripts/best_hyperparameters.json
+!redundant/py scripts/model_config.json
+!redundant/py scripts/production_catboost_model.pkl
+!redundant/py scripts/requirements.txt
+
+# Allow backend model files
+!apps/backend/best_heating_model.pkl
+!apps/backend/feature_scaler.pkl
+!apps/backend/model_info.json
+
+# Backup and temporary files
+e HEAD
+*.bak
+*.backup
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node.js build artifacts
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/ 

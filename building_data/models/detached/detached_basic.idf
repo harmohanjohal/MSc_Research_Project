@@ -1,0 +1,963 @@
+Version,
+  25.1;                                   !- Version Identifier
+
+Output:Diagnostics,
+  DisplayExtraWarnings,
+  DisplayAdvancedReportVariables;
+
+Timestep,
+  6;                                      !- Number of Timesteps per Hour
+
+RunPeriod,
+  Run Period 1,                           !- Name
+  1,                                      !- Begin Month
+  1,                                      !- Begin Day of Month
+  ,                                       !- Begin Year
+  12,                                     !- End Month
+  31,                                     !- End Day of Month
+  ,                                       !- End Year
+  Wednesday,                              !- Day of Week for Start Day
+  Yes,                                    !- Use Weather File Holidays and Special Days
+  Yes,                                    !- Use Weather File Daylight Saving Period
+  No,                                     !- Apply Weekend Holiday Rule
+  Yes,                                    !- Use Weather File Rain Indicators
+  Yes;                                    !- Use Weather File Snow Indicators
+
+SimulationControl,
+  No,                                     !- Do Zone Sizing Calculation
+  No,                                     !- Do System Sizing Calculation
+  No,                                     !- Do Plant Sizing Calculation
+  Yes,                                    !- Run Simulation for Sizing Periods
+  Yes,                                    !- Run Simulation for Weather File Run Periods
+  ,                                       !- Do HVAC Sizing Simulation for Sizing Periods
+  ;                                       !- Maximum Number of HVAC Sizing Simulation Passes
+
+Building,
+  Detached,                        !- Name
+  0,                                      !- North Axis {deg}
+  ,                                       !- Terrain
+  0.04,                                   !- Loads Convergence Tolerance Value
+  0.4,                                    !- Temperature Convergence Tolerance Value {deltaC}
+  FullExterior,                           !- Solar Distribution
+  25;                                     !- Maximum Number of Warmup Days
+
+GlobalGeometryRules,
+  UpperLeftCorner,                        !- Starting Vertex Position
+  Counterclockwise,                       !- Vertex Entry Direction
+  Relative,                               !- Coordinate System
+  Relative,                               !- Daylighting Reference Point Coordinate System
+  Relative;                               !- Rectangular Surface Coordinate System
+
+Material,
+  Brick,                                  !- Name
+  MediumRough,                            !- Roughness
+  0.1,                                    !- Thickness {m}
+  0.77,                                   !- Conductivity {W/m-K}
+  1920,                                   !- Density {kg/m3}
+  790,                                    !- Specific Heat {J/kg-K}
+  0.9,                                    !- Thermal Absorptance
+  0.7,                                    !- Solar Absorptance
+  0.7;                                    !- Visible Absorptance
+
+Material,
+  Insulation,                             !- Name
+  MediumRough,                            !- Roughness
+  0.1,                                    !- Thickness {m} - IMPROVED from 90mm to 100mm
+  0.022,                                  !- Conductivity {W/m-K} - IMPROVED from 0.04
+  35,                                     !- Density {kg/m3}
+  1030,                                   !- Specific Heat {J/kg-K}
+  0.9,                                    !- Thermal Absorptance
+  0.7,                                    !- Solar Absorptance
+  0.7;                                    !- Visible Absorptance
+
+Material,
+  Concrete,                               !- Name
+  MediumRough,                            !- Roughness
+  0.15,                                   !- Thickness {m}
+  1.4,                                    !- Conductivity {W/m-K}
+  2300,                                   !- Density {kg/m3}
+  1000,                                   !- Specific Heat {J/kg-K}
+  0.9,                                    !- Thermal Absorptance
+  0.7,                                    !- Solar Absorptance
+  0.7;                                    !- Visible Absorptance
+
+Material,
+  ClayTiles,                             !- Name
+  Rough,                                 !- Roughness
+  0.020,                                 !- Thickness {m}
+  1.30,                                  !- Conductivity {W/m-K}
+  1920,                                  !- Density {kg/m3}
+  840;                                   !- Specific Heat {J/kg-K}
+
+Material,
+  Roof_MW200,                            !- Name
+  MediumRough,                           !- Roughness
+  0.20,                                  !- Thickness {m}        ! 200 mm mineral wool - IMPROVED
+  0.040,                                 !- Conductivity {W/m-K}
+  12,                                    !- Density {kg/m3}
+  840;                                    !- Specific Heat {J/kg-K}
+
+Material,
+  Plasterboard,                          !- Name
+  Smooth,                                !- Roughness
+  0.015,                                 !- Thickness {m}
+  0.160,                                 !- Conductivity {W/m-K}
+  950,                                   !- Density {kg/m3}
+  840;                                   !- Specific Heat {J/kg-K}
+
+Material,
+  Blockwork,                             !- Name
+  MediumRough,                           !- Roughness
+  0.1,                                   !- Thickness {m}
+  0.15,                                  !- Conductivity {W/m-K}
+  1800,                                  !- Density {kg/m3}
+  1000,                                  !- Specific Heat {J/kg-K}
+  0.9,                                   !- Thermal Absorptance
+  0.7,                                   !- Solar Absorptance
+  0.7;                                   !- Visible Absorptance
+
+WindowMaterial:Glazing,
+  OuterLowE,                            !- Name
+  SpectralAverage,                       !- Optical Data Type
+  ,                                      !- Window Glass Spectral Data Set Name
+  0.004,                                 !- Thickness {m}
+  0.70,                                  !- Solar Transmittance at Normal Incidence
+  0.11,                                  !- Front Side Solar Reflectance at Normal Incidence
+  0.11,                                  !- Back Side Solar Reflectance at Normal Incidence
+  0.82,                                  !- Visible Transmittance at Normal Incidence
+  0.09,                                  !- Front Side Visible Reflectance at Normal Incidence
+  0.09,                                  !- Back Side Visible Reflectance at Normal Incidence
+  0.0,                                   !- Infrared Transmittance at Normal Incidence
+  0.84,                                  !- Front Side Infrared Hemispherical Emissivity
+  0.10,                                  !- Back Side Infrared Hemispherical Emissivity  ! low-E coating
+  1.0;                                   !- Conductivity {W/m-K}
+
+WindowMaterial:Gas,
+  ArgonGap,                              !- Name
+  Argon,                                 !- Gas Type
+  0.016;                                 !- Thickness {m}
+
+WindowMaterial:Glazing,
+  InnerGlass,                            !- Name
+  SpectralAverage,                       !- Optical Data Type
+  ,                                      !- Window Glass Spectral Data Set Name
+  0.003,                                 !- Thickness {m}
+  0.84,                                  !- Solar Transmittance at Normal Incidence
+  0.07,                                  !- Front Side Solar Reflectance at Normal Incidence
+  0.07,                                  !- Back Side Solar Reflectance at Normal Incidence
+  0.89,                                  !- Visible Transmittance at Normal Incidence
+  0.09,                                  !- Front Side Visible Reflectance at Normal Incidence
+  0.09,                                  !- Back Side Visible Reflectance at Normal Incidence
+  0.0,                                   !- Infrared Transmittance at Normal Incidence
+  0.84,                                  !- Front Side Infrared Hemispherical Emissivity
+  0.84,                                  !- Back Side Infrared Hemispherical Emissivity
+  1.0;                                   !- Conductivity {W/m-K}
+
+Construction,
+  WallConstruction,                       !- Name
+  Brick,                                  !- Outside Layer
+  Insulation,                             !- Layer 2 - IMPROVED insulation
+  Blockwork;                              !- Layer 3 - ADDED thermal mass
+
+Construction,
+  WindowConstruction,                     !- Name
+  OuterLowE,                              !- Outside Layer - UPGRADED to Low-E double glazing
+  ArgonGap,                               !- Layer 2 - ADDED argon gap
+  InnerGlass;                             !- Layer 3 - ADDED inner glass
+
+Construction,
+  FloorConstruction,                      !- Name
+  Concrete,                               !- Outside Layer
+  Insulation;                             !- Layer 2 - ADDED floor insulation
+
+Construction,
+  RoofConstruction,                      !- Name
+  ClayTiles,                              !- Outside Layer
+  Roof_MW200,                             !- Layer 2 - IMPROVED to 200mm insulation
+  Plasterboard;                            !- Layer 3 - ADDED plasterboard
+
+Zone,
+  MainZone,                               !- Name
+  0,                                      !- Direction of Relative North {deg}
+  0,                                      !- X Origin {m}
+  0,                                      !- Y Origin {m}
+  0,                                      !- Z Origin {m}
+  ,                                       !- Type
+  1,                                      !- Multiplier
+  6.0,                                    !- Ceiling Height {m}
+  672,                                    !- Volume {m3} - CORRECTED for 14x8x6m
+  224,                                    !- Floor Area {m2} - 14x8 = 112m² per floor, 2 floors
+  ,                                       !- Zone Inside Convection Algorithm
+  ,                                       !- Zone Outside Convection Algorithm
+  Yes;                                    !- Part of Total Floor Area
+
+BuildingSurface:Detailed,
+  FrontWall,                                  !- Name
+  Wall,                                   !- Surface Type
+  WallConstruction,                       !- Construction Name
+  MainZone,                               !- Zone Name
+  ,                                       !- Space Name
+  Outdoors,                               !- Outside Boundary Condition
+  ,                                       !- Outside Boundary Condition Object
+  SunExposed,                             !- Sun Exposure
+  WindExposed,                            !- Wind Exposure
+  ,                                       !- View Factor to Ground
+  4,                                      !- Number of Surface Vertices
+  0,0,0,
+  14,0,0,
+  14,0,6.0,
+  0,0,6.0;
+
+BuildingSurface:Detailed,
+  EastWall,                                  !- Name
+  Wall,                                   !- Surface Type
+  WallConstruction,                       !- Construction Name
+  MainZone,                               !- Zone Name
+  ,                                       !- Space Name
+  Outdoors,                               !- Outside Boundary Condition
+  ,                                       !- Outside Boundary Condition Object
+  SunExposed,                             !- Sun Exposure
+  WindExposed,                            !- Wind Exposure
+  ,                                       !- View Factor to Ground
+  4,                                      !- Number of Surface Vertices
+  14,0,0,
+  14,8,0,
+  14,8,6.0,
+  14,0,6.0;
+
+BuildingSurface:Detailed,
+  RearWall,                                  !- Name
+  Wall,                                   !- Surface Type
+  WallConstruction,                       !- Construction Name
+  MainZone,                               !- Zone Name
+  ,                                       !- Space Name
+  Outdoors,                               !- Outside Boundary Condition
+  ,                                       !- Outside Boundary Condition Object
+  SunExposed,                             !- Sun Exposure
+  WindExposed,                            !- Wind Exposure
+  ,                                       !- View Factor to Ground
+  4,                                      !- Number of Surface Vertices
+  14,8,0,
+  0,8,0,
+  0,8,6.0,
+  14,8,6.0;
+
+BuildingSurface:Detailed,
+  WestWall,                                  !- Name
+  Wall,                                   !- Surface Type
+  WallConstruction,                       !- Construction Name
+  MainZone,                               !- Zone Name
+  ,                                       !- Space Name
+  Outdoors,                               !- Outside Boundary Condition
+  ,                                       !- Outside Boundary Condition Object
+  SunExposed,                             !- Sun Exposure
+  WindExposed,                            !- Wind Exposure
+  ,                                       !- View Factor to Ground
+  4,                                      !- Number of Surface Vertices
+  0,8,0,
+  0,0,0,
+  0,0,6.0,
+  0,8,6.0;
+
+BuildingSurface:Detailed,
+  GroundFloor,                                  !- Name
+  Floor,                                  !- Surface Type
+  FloorConstruction,                      !- Construction Name
+  MainZone,                               !- Zone Name
+  ,                                       !- Space Name
+  Ground,                                 !- Outside Boundary Condition
+  ,                                       !- Outside Boundary Condition Object
+  NoSun,                                  !- Sun Exposure
+  NoWind,                                 !- Wind Exposure
+  ,                                       !- View Factor to Ground
+  4,                                      !- Number of Surface Vertices
+  0,0,0,
+  14,0,0,
+  14,8,0,
+  0,8,0;
+
+BuildingSurface:Detailed,
+  Roof,                                  !- Name
+  Ceiling,                                !- Surface Type
+  RoofConstruction,                       !- Construction Name
+  MainZone,                               !- Zone Name
+  ,                                       !- Space Name
+  Outdoors,                               !- Outside Boundary Condition
+  ,                                       !- Outside Boundary Condition Object
+  SunExposed,                             !- Sun Exposure
+  WindExposed,                            !- Wind Exposure
+  ,                                       !- View Factor to Ground
+  4,                                      !- Number of Surface Vertices
+  0,0,6.0,
+  14,0,6.0,
+  14,8,6.0,
+  0,8,6.0;
+
+ThermostatSetpoint:SingleHeating,
+  MainZone Heating Setpoint,              !- Name
+  HeatingSchedule;                        !- Setpoint Temperature Schedule Name
+
+FenestrationSurface:Detailed,
+  FrontWindow1,
+  Window,
+  WindowConstruction,
+  FrontWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  2.0,0,0.8,
+  4.5,0,0.8,
+  4.5,0,2.8,
+  2.0,0,2.8;
+
+FenestrationSurface:Detailed,
+  FrontWindow2,
+  Window,
+  WindowConstruction,
+  FrontWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  9.5,0,0.8,
+  12.0,0,0.8,
+  12.0,0,2.8,
+  9.5,0,2.8;
+
+FenestrationSurface:Detailed,
+  RearWindow1,
+  Window,
+  WindowConstruction,
+  RearWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  12.5,8,2.8,
+  12.5,8,0.8,
+  10.0,8,0.8,
+  10.0,8,2.8;
+
+FenestrationSurface:Detailed,
+  RearWindow2,
+  Window,
+  WindowConstruction,
+  RearWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  3.5,8,2.3,
+  3.5,8,0.8,
+  2.0,8,0.8,
+  2.0,8,2.3;
+
+FenestrationSurface:Detailed,
+  WestWindow1,
+  Window,
+  WindowConstruction,
+  WestWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  0,3.5,0.8,
+  0,2.0,0.8,
+  0,2.0,2.3,
+  0,3.5,2.3;
+
+FenestrationSurface:Detailed,
+  WestWindow2,
+  Window,
+  WindowConstruction,
+  WestWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  0,6.5,0.8,
+  0,5.0,0.8,
+  0,5.0,2.3,
+  0,6.5,2.3;
+
+FenestrationSurface:Detailed,
+  EastWindow1,
+  Window,
+  WindowConstruction,
+  EastWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  14,2.0,2.3,
+  14,2.0,0.8,
+  14,3.5,0.8,
+  14,3.5,2.3;
+
+FenestrationSurface:Detailed,
+  EastWindow2,
+  Window,
+  WindowConstruction,
+  EastWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  14,6.5,0.8,
+  14,6.5,2.3,
+  14,5.0,2.3,
+  14,5.0,0.8;
+
+FenestrationSurface:Detailed,
+  FrontWindow3,
+  Window,
+  WindowConstruction,
+  FrontWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  2.0,0,5.8,
+  2.0,0,3.8,
+  4.5,0,3.8,
+  4.5,0,5.8;
+
+FenestrationSurface:Detailed,
+  FrontWindow4,
+  Window,
+  WindowConstruction,
+  FrontWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  11.0,0,3.8,
+  11.0,0,5.3,
+  9.5,0,5.3,
+  9.5,0,3.8;
+
+FenestrationSurface:Detailed,
+  RearWindow3,
+  Window,
+  WindowConstruction,
+  RearWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  11.5,8,5.3,
+  11.5,8,3.8,
+  10.0,8,3.8,
+  10.0,8,5.3;
+
+FenestrationSurface:Detailed,
+  RearWindow4,
+  Window,
+  WindowConstruction,
+  RearWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  3.5,8,5.3,
+  3.5,8,3.8,
+  2.0,8,3.8,
+  2.0,8,5.3;
+
+FenestrationSurface:Detailed,
+  WestWindow3,
+  Window,
+  WindowConstruction,
+  WestWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  0,3.5,3.8,
+  0,2.0,3.8,
+  0,2.0,5.3,
+  0,3.5,5.3;
+
+FenestrationSurface:Detailed,
+  WestWindow4,
+  Window,
+  WindowConstruction,
+  WestWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  0,6.5,3.8,
+  0,5.0,3.8,
+  0,5.0,5.3,
+  0,6.5,5.3;
+
+FenestrationSurface:Detailed,
+  EastWindow3,
+  Window,
+  WindowConstruction,
+  EastWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  14,3.5,3.8,
+  14,3.5,5.3,
+  14,2.0,5.3,
+  14,2.0,3.8;
+
+FenestrationSurface:Detailed,
+  EastWindow4,
+  Window,
+  WindowConstruction,
+  EastWall,
+  0.5,
+  ,
+  ,
+  1,
+  4,
+  14,6.5,3.8,
+  14,6.5,5.3,
+  14,5.0,5.3,
+  14,5.0,3.8;
+
+Schedule:Constant,
+  Always On Discrete,                     !- Name
+  OnOff,                                  !- Schedule Type Limits Name
+  1;                                      !- Hourly Value
+
+Schedule:Constant,
+  Always Off Discrete,                    !- Name
+  OnOff 1,                                !- Schedule Type Limits Name
+  0;                                      !- Hourly Value
+
+Schedule:Constant,
+  Always On Continuous,                   !- Name
+  Fractional,                             !- Schedule Type Limits Name
+  1;                                      !- Hourly Value
+
+ScheduleTypeLimits,
+  Fraction,                               !- Name
+  ,                                       !- Lower Limit Value {BasedOnField A3}
+  ,                                       !- Upper Limit Value {BasedOnField A3}
+  ,                                       !- Numeric Type
+  dimensionless;                          !- Unit Type
+
+ScheduleTypeLimits,
+  Fractional,                             !- Name
+  0,                                      !- Lower Limit Value {BasedOnField A3}
+  1,                                      !- Upper Limit Value {BasedOnField A3}
+  Continuous;                             !- Numeric Type
+
+ScheduleTypeLimits,
+  OnOff,                                  !- Name
+  0,                                      !- Lower Limit Value {BasedOnField A3}
+  1,                                      !- Upper Limit Value {BasedOnField A3}
+  Discrete,                               !- Numeric Type
+  availability;                           !- Unit Type
+
+ScheduleTypeLimits,
+  OnOff 1,                                !- Name
+  0,                                      !- Lower Limit Value {BasedOnField A3}
+  1,                                      !- Upper Limit Value {BasedOnField A3}
+  Discrete,                               !- Numeric Type
+  availability;                           !- Unit Type
+
+ScheduleTypeLimits,
+  Temperature;                            !- Name
+
+Schedule:Day:Interval,
+  HeatingDay,                             !- Name
+  Temperature,                            !- Schedule Type Limits Name
+  No,                                     !- Interpolate to Timestep
+  07:00,                                  !- Time 1 {hh:mm}
+  21,                                     !- Value Until Time 1 - EXECUTIVE COMFORT (MODERATED)
+  23:00,                                  !- Time 2 {hh:mm}
+  18,                                     !- Value Until Time 2 - NIGHT SETBACK
+  24:00,                                  !- Time 3 {hh:mm}
+  21;                                     !- Value Until Time 3
+
+Schedule:Week:Daily,
+  HeatingWeek,                            !- Name
+  HeatingDay,                             !- Sunday Schedule:Day Name
+  HeatingDay,                             !- Monday Schedule:Day Name
+  HeatingDay,                             !- Tuesday Schedule:Day Name
+  HeatingDay,                             !- Wednesday Schedule:Day Name
+  HeatingDay,                             !- Thursday Schedule:Day Name
+  HeatingDay,                             !- Friday Schedule:Day Name
+  HeatingDay,                             !- Saturday Schedule:Day Name
+  HeatingDay,                             !- Holiday Schedule:Day Name
+  HeatingDay,                             !- SummerDesignDay Schedule:Day Name
+  HeatingDay,                             !- WinterDesignDay Schedule:Day Name
+  HeatingDay,                             !- CustomDay1 Schedule:Day Name
+  HeatingDay;                             !- CustomDay2 Schedule:Day Name
+
+Schedule:Year,
+  HeatingSchedule,                        !- Name
+  Temperature,                            !- Schedule Type Limits Name
+  HeatingWeek,                            !- Schedule:Week Name 1
+  1,                                      !- Start Month 1
+  1,                                      !- Start Day 1
+  12,                                     !- End Month 1
+  31;                                     !- End Day 1
+
+ZoneControl:Thermostat,
+  MainZone Thermostat,                    !- Name
+  MainZone,                               !- Zone or ZoneList Name
+  Always On Discrete,                     !- Control Type Schedule Name
+  ThermostatSetpoint:SingleHeating,       !- Control 1 Object Type
+  MainZone Heating Setpoint,              !- Control 1 Name
+  ,                                       !- Control 2 Object Type
+  ,                                       !- Control 2 Name
+  ,                                       !- Control 3 Object Type
+  ,                                       !- Control 3 Name
+  ,                                       !- Control 4 Object Type
+  ;                                       !- Control 4 Name
+
+ZoneHVAC:EquipmentList,
+  MainZone Equipment,                     !- Name
+  SequentialLoad,                         !- Load Distribution Scheme
+  ZoneHVAC:Baseboard:Convective:Water,    !- Zone Equipment 1 Object Type
+  MainZone Baseboard,                     !- Zone Equipment 1 Name
+  1,                                      !- Zone Equipment 1 Cooling Sequence
+  1;                                      !- Zone Equipment 1 Heating or No-Load Sequence
+
+ZoneHVAC:EquipmentConnections,
+  MainZone,
+  MainZone Equipment,
+  ,
+  ,
+  MainZone Air Node,
+  ;
+
+ZoneHVAC:Baseboard:Convective:Water,
+  MainZone Baseboard,
+  Always On Discrete,
+  DH Demand Pipe Outlet Node,
+  DH Demand Outlet Pipe Inlet Node,
+  HeatingDesignCapacity,
+  10000,                                  !- Heating Design Capacity {W} - REDUCED FOR BETTER CONTROL
+  ,                                       !- Heating Design Capacity Per Floor Area {W/m2}
+  ,                                       !- Fraction of Autosized Heating Design Capacity
+  800,                                    !- U-Factor Times Area Value {W/K} - BALANCED FOR PROPER PEAK
+  0.0013,                                 !- Maximum Water Flow Rate {m3/s} - BUNGALOW-SCALED
+  0.001;                                  !- Convergence Tolerance
+
+Pump:ConstantSpeed,
+  DH Pump,
+  DH Supply Inlet Node,
+  DH Supply Outlet Node,
+  0.0013,                                 !- Design Flow Rate {m3/s} - BUNGALOW-SCALED
+  30000,                                  !- Design Pump Head {Pa}
+  85,                                     !- Design Power Consumption {W} - BUNGALOW-SCALED
+  0.9,                                    !- Motor Efficiency
+  0,                                      !- Fraction of Motor Inefficiencies to Fluid Stream
+  Intermittent;                           !- Pump Control Type
+
+DistrictHeating:Water,
+  DH Source,                !- Name
+  DH Supply Outlet Node,    !- Hot Water Inlet Node Name
+  DH Loop Outlet Node,      !- Hot Water Outlet Node Name
+  25000;                    !- Nominal Capacity {W}
+
+PlantEquipmentList,
+  DH Equipment List,
+  DistrictHeating:Water,
+  DH Source;
+
+PlantEquipmentOperationSchemes,
+  DH Loop Operation Schemes,
+  PlantEquipmentOperation:HeatingLoad,
+  DH Heating Load Scheme,
+  Always On Continuous;
+
+PlantEquipmentOperation:HeatingLoad,
+  DH Heating Load Scheme,
+  0,
+  25000,
+  DH Equipment List;
+
+PlantLoop,
+  DH Loop,
+  Water,
+  ,
+  DH Loop Operation Schemes,
+  DH Loop Outlet Node,
+  85,
+  60,
+  0.0015,
+  0,
+  0.2,
+  DH Supply Inlet Node,
+  DH Loop Outlet Node,
+  DH Supply Branches,
+  ,
+  DH Demand Inlet Node,
+  DH Demand Outlet Node,
+  DH Demand Branches,
+  ,
+  Optimal;
+
+BranchList,
+  DH Supply Branches,
+  DH Supply Branch;
+
+Branch,
+  DH Supply Branch,
+  ,
+  Pump:ConstantSpeed,
+  DH Pump,
+  DH Supply Inlet Node,
+  DH Supply Outlet Node,
+  DistrictHeating:Water,
+  DH Source,
+  DH Supply Outlet Node,
+  DH Loop Outlet Node;
+
+BranchList,
+  DH Demand Branches,
+  DH Demand Branch;
+
+Branch,
+  DH Demand Branch,
+  ,
+  Pipe:Adiabatic,
+  DH Demand Inlet Pipe,
+  DH Demand Inlet Node,
+  DH Demand Pipe Outlet Node,
+  ZoneHVAC:Baseboard:Convective:Water,
+  MainZone Baseboard,
+  DH Demand Pipe Outlet Node,
+  DH Demand Outlet Pipe Inlet Node,
+  Pipe:Adiabatic,
+  DH Demand Outlet Pipe,
+  DH Demand Outlet Pipe Inlet Node,
+  DH Demand Outlet Node;
+
+Pipe:Adiabatic,
+  DH Demand Inlet Pipe,
+  DH Demand Inlet Node,
+  DH Demand Pipe Outlet Node;
+
+Pipe:Adiabatic,
+  DH Demand Outlet Pipe,
+  DH Demand Outlet Pipe Inlet Node,
+  DH Demand Outlet Node;
+
+SetpointManager:Scheduled,
+  DH Supply Setpoint Manager,
+  Temperature,
+  DistrictHeatingSetpointSched,
+  DH Loop Outlet Node;
+
+SetpointManager:Scheduled,
+  DH Inlet Setpoint Manager,
+  Temperature,
+  DistrictHeatingSetpointSched,
+  DH Supply Inlet Node;
+
+ZoneInfiltration:DesignFlowRate,
+  MainZone Infiltration,
+  MainZone,
+  Always On Continuous,
+  AirChanges/Hour,
+  ,
+  ,
+  ,
+  0.5,                                    !- 0.5 ACH - EXCELLENT EXECUTIVE AIRTIGHTNESS
+  1,
+  0,
+  0,
+  0;
+
+Schedule:Constant,
+  DistrictHeatingSetpointSched,
+  Temperature,
+  70;
+
+Output:Variable,
+  *,
+  Plant Supply Side Heating Demand Rate,
+  Hourly;
+
+Output:Variable,
+  *,
+  Plant Supply Side Inlet Mass Flow Rate,
+  Hourly;
+
+Output:Variable,
+  *,
+  Plant Supply Side Outlet Temperature,
+  Hourly;
+
+Output:Variable,
+  *,
+  Baseboard Total Heating Rate,
+  Hourly;
+
+Output:Variable,
+  *,
+  Baseboard Hot Water Energy,
+  Hourly;
+
+Output:Variable,
+  *,
+  Pump Electricity Rate,
+  Hourly;
+
+Output:VariableDictionary,
+  IDF,                                    !- Key Field
+  Unsorted;                               !- Sort Option
+
+Output:SQLite,
+  SimpleAndTabular;                       !- Option Type
+
+Output:Table:SummaryReports,
+  AllSummary;                             !- Report Name 1
+
+! ------------------------------------------------------------------------------
+! Added for proper sizing and design-day generation
+
+Sizing:Parameters,
+  1.1,                                    !- Heating Sizing Factor (10% oversize)
+  1.0;                                    !- Cooling Sizing Factor
+
+SizingPeriod:WeatherFileConditionType,
+  Extreme Winter Weather,                 !- Name
+  WinterExtreme,                          !- Period Selection
+  WinterDesignDay,                        !- Day of Week for Start Day
+  No,                                     !- Use Weather File Daylight Saving Period
+  No;                                     !- Use Weather File Rain and Snow Indicators
+
+SizingPeriod:WeatherFileConditionType,
+  Extreme Summer Weather,                 !- Name
+  SummerExtreme,                          !- Period Selection
+  SummerDesignDay,                        !- Day of Week for Start Day
+  No,                                     !- Use Weather File Daylight Saving Period
+  No;                                     !- Use Weather File Rain and Snow Indicators
+
+! ------------------------------------------------------------------------------
+! Added zone and plant sizing objects for MainZone and DH Loop
+
+Sizing:Zone,
+  MainZone,                               !- Zone Name
+  SupplyAirTemperature,                   !- Cooling design method (not used)
+  14.0,
+  ,
+  SupplyAirTemperature,
+  50.0,
+  ,
+  0.0085,
+  0.008,
+  ,
+  1.0,
+  1.0;
+
+Sizing:Plant,
+  DH Loop,                                !- Plant Loop Name
+  Heating,
+  60,
+  5;
+
+! ============= OCCUPANCY & INTERNAL LOADS (EXECUTIVE FAMILY) =============
+
+Schedule:Day:Interval,
+  OccupancyDay,                           !- Name
+  Fractional,                             !- Schedule Type Limits Name
+  No,                                     !- Interpolate to Timestep
+  06:00,                                  !- Time 1 {hh:mm}
+  1.0,                                    !- Value Until Time 1 - EXECUTIVE FAMILY HOME
+  08:30,                                  !- Time 2 {hh:mm}
+  0.4,                                    !- Value Until Time 2 - WORK DEPARTURE
+  15:30,                                  !- Time 3 {hh:mm}
+  0.2,                                    !- Value Until Time 3 - MINIMAL OCCUPANCY
+  17:00,                                  !- Time 4 {hh:mm}
+  0.8,                                    !- Value Until Time 4 - CHILDREN RETURN
+  19:00,                                  !- Time 5 {hh:mm}
+  1.0,                                    !- Value Until Time 5 - FULL FAMILY HOME
+  24:00,                                  !- Time 6 {hh:mm}
+  1.0;                                    !- Value Until Time 6 - HOME EVENING/NIGHT
+
+Schedule:Week:Daily,
+  OccupancyWeek,                          !- Name
+  OccupancyDay,                           !- Sunday Schedule:Day Name
+  OccupancyDay,                           !- Monday Schedule:Day Name
+  OccupancyDay,                           !- Tuesday Schedule:Day Name
+  OccupancyDay,                           !- Wednesday Schedule:Day Name
+  OccupancyDay,                           !- Thursday Schedule:Day Name
+  OccupancyDay,                           !- Friday Schedule:Day Name
+  OccupancyDay,                           !- Saturday Schedule:Day Name
+  OccupancyDay,                           !- Holiday Schedule:Day Name
+  OccupancyDay,                           !- SummerDesignDay Schedule:Day Name
+  OccupancyDay,                           !- WinterDesignDay Schedule:Day Name
+  OccupancyDay,                           !- CustomDay1 Schedule:Day Name
+  OccupancyDay;                           !- CustomDay2 Schedule:Day Name
+
+Schedule:Year,
+  OccupancySchedule,                      !- Name
+  Fractional,                             !- Schedule Type Limits Name
+  OccupancyWeek,                          !- Schedule:Week Name 1
+  1,                                      !- Start Month 1
+  1,                                      !- Start Day 1
+  12,                                     !- End Month 1
+  31;                                     !- End Day 1
+
+Schedule:Constant,
+  ActivitySchedule,
+  Any Number,
+  115;                                    !- W/person - EXECUTIVE ACTIVITY LEVEL
+
+! PEOPLE - EXECUTIVE FAMILY (5 PEOPLE)
+People,
+  MainZone People,
+  MainZone,
+  OccupancySchedule,
+  People,
+  5,                                      !- 5 PEOPLE - LARGE EXECUTIVE FAMILY
+  ,
+  ,
+  0.3,
+  ,
+  ActivitySchedule;
+
+! LIGHTS - EXECUTIVE STANDARD (10 W/m²)
+Lights,
+  MainZone Lights,
+  MainZone,
+  OccupancySchedule,                      !- Use occupancy-based schedule
+  Watts/Area,
+  ,
+  10,                                     !- 10 W/m² - EXECUTIVE LIGHTING (2,240W total)
+  ,
+  0,
+  0.4,
+  0.2;
+
+! EQUIPMENT - EXECUTIVE FEATURES (16 W/m²)
+ElectricEquipment,
+  MainZone Equipment,
+  MainZone,
+  OccupancySchedule,                      !- Use occupancy-based schedule
+  Watts/Area,
+  ,
+  12,                                     !- 12 W/m² - BALANCED EXECUTIVE EQUIPMENT (2,688W total)
+  ,
+  0,
+  0.3,
+  0;

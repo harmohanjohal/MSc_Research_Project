@@ -1,0 +1,67 @@
+# Git files
+.git
+.gitignore
+
+# Documentation
+*.md
+docs/
+redundant/
+
+# Development files
+.vscode/
+.cursor/
+.idea/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large data files
+weather/
+archive/
+extra/
+py scripts/
+scripts/
+
+# Test files
+tests/
+*.test.js
+*.test.ts
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
