@@ -4,6 +4,7 @@ import React from 'react'
 import { AlertTriangle, RefreshCw, Wifi, WifiOff } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card'
 import { Button } from './button'
+import { cn } from '@/lib/utils'
 
 // Error Boundary Component
 interface ErrorBoundaryState {
@@ -101,32 +102,33 @@ interface ApiStatusProps {
 
 export function ApiStatus({ isConnected, lastCheck, onRetry }: ApiStatusProps) {
   return (
-    <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs ${
-      isConnected 
-        ? 'bg-green-100 text-green-800 border border-green-200' 
-        : 'bg-red-100 text-red-800 border border-red-200'
-    }`}>
+    <div className={cn(
+      "flex items-center gap-2 px-3 py-1 rounded border font-mono text-[9px] tracking-widest font-bold uppercase transition-all",
+      isConnected
+        ? 'bg-primary/10 text-primary border-primary/20'
+        : 'bg-destructive/10 text-destructive border-destructive/20 animate-pulse'
+    )}>
       {isConnected ? (
         <Wifi className="h-3 w-3" />
       ) : (
         <WifiOff className="h-3 w-3" />
       )}
       <span>
-        {isConnected ? 'API Connected' : 'API Disconnected'}
+        {isConnected ? 'LINK: ACTIVE' : 'LINK: LOST'}
       </span>
       {lastCheck && (
-        <span className="text-xs opacity-75">
-          ({lastCheck.toLocaleTimeString()})
+        <span className="opacity-50 font-normal">
+          [{lastCheck.toLocaleTimeString([], { hour12: false })}]
         </span>
       )}
       {!isConnected && onRetry && (
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={onRetry}
-          className="h-4 w-4 p-0 ml-1"
+          className="h-3 w-3 p-0 ml-1 hover:bg-destructive/20 text-destructive"
         >
-          <RefreshCw className="h-3 w-3" />
+          <RefreshCw className="h-2 w-2" />
         </Button>
       )}
     </div>
@@ -173,9 +175,9 @@ interface LoadingStateProps {
   className?: string
 }
 
-export function LoadingState({ 
-  loading, 
-  children, 
+export function LoadingState({
+  loading,
+  children,
   fallback = <LoadingSpinner text="Loading..." />,
   className = ''
 }: LoadingStateProps) {

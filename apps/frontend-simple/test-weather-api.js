@@ -70,4 +70,4 @@ async function testWeatherApi() {
 }
 
 // Run the test
-testWeatherAPI();
+testWeatherApi();

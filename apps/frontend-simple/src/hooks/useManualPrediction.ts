@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { apiService, type WeatherData, type BuildingData, type PredictionResult } from '@/lib/api'
 import { weatherService } from '@/lib/weather'
 
+export type { WeatherData, BuildingData, PredictionResult }
+
 export interface HourlyWeatherData {
     [hour: number]: WeatherData
 }
@@ -20,7 +22,7 @@ export function useManualPrediction() {
         floorArea: 120,
         numFloors: 2,
         infiltrationRate: 0.5,
-        buildingType: 'detached',
+        buildingType: 'Residential',
         constructionType: 'standard'
     })
 
@@ -35,7 +37,7 @@ export function useManualPrediction() {
             try {
                 const isAvailable = await weatherService.isAvailable()
                 if (isAvailable) {
-                    const forecast = await weatherService.getWeatherForecast('London', predictionHorizon)
+                    const { forecast } = await weatherService.getWeatherForecast(undefined, predictionHorizon)
                     for (let hour = 1; hour <= predictionHorizon; hour++) {
                         if (!hourlyWeatherData[hour]) {
                             const hourData = forecast[hour - 1]
@@ -103,15 +105,15 @@ export function useManualPrediction() {
             const predictions: HourlyPrediction[] = []
 
             for (let hour = 1; hour <= predictionHorizon; hour++) {
-                const weatherData = hourlyWeatherData[hour]
-                if (!weatherData) {
+                const weatherDataValue = hourlyWeatherData[hour]
+                if (!weatherDataValue) {
                     throw new Error(`Missing weather data for hour ${hour}`)
                 }
 
-                const result = await apiService.predictSingle(weatherData, buildingData)
+                const result = await apiService.predictSingle(weatherDataValue, buildingData)
                 predictions.push({
                     hour,
-                    weather: weatherData,
+                    weather: weatherDataValue,
                     prediction: result,
                     timestamp: result.timestamp
                 })
@@ -125,18 +127,18 @@ export function useManualPrediction() {
         }
     }
 
-    const handleWeatherChange = (hour: number, field: keyof WeatherData, value: number) => {
+    const handleWeatherChange = (hour: number, data: Partial<WeatherData>) => {
         setHourlyWeatherData(prev => ({
             ...prev,
             [hour]: {
                 ...prev[hour],
-                [field]: value
+                ...data
             }
         }))
     }
 
-    const handleBuildingChange = (field: keyof BuildingData, value: any) => {
-        setBuildingData(prev => ({ ...prev, [field]: value }))
+    const handleBuildingChange = (data: Partial<BuildingData>) => {
+        setBuildingData(prev => ({ ...prev, ...data }))
     }
 
     return {
@@ -152,3 +154,4 @@ export function useManualPrediction() {
         handleBuildingChange
     }
 }
+

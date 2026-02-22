@@ -1,105 +1,89 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Building } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { type BuildingData } from '@/lib/api'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { type BuildingData } from '@/hooks/useManualPrediction'
+import { Home, Ruler, Layers, Wind, Building } from 'lucide-react'
 
 interface BuildingSpecsCardProps {
     buildingData: BuildingData
-    onBuildingChange: (field: keyof BuildingData, value: any) => void
+    onBuildingChange: (data: Partial<BuildingData>) => void
 }
 
 export function BuildingSpecsCard({ buildingData, onBuildingChange }: BuildingSpecsCardProps) {
     return (
-        <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-        >
-            <Card className="shadow-sm hover:shadow-md transition-shadow duration-300">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Building className="h-5 w-5" />
-                        Building Specifications
-                    </CardTitle>
-                    <CardDescription>
-                        Building characteristics (same for all hours)
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="floorArea">Floor Area (m²)</Label>
-                            <Input
-                                id="floorArea"
-                                type="number"
-                                value={buildingData.floorArea}
-                                onChange={(e) => onBuildingChange('floorArea', parseFloat(e.target.value))}
-                                onBlur={(e) => onBuildingChange('floorArea', Number(parseFloat(e.target.value).toFixed(2)))}
-                                step="0.01"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="numFloors">Number of Floors</Label>
-                            <Input
-                                id="numFloors"
-                                type="number"
-                                value={buildingData.numFloors}
-                                onChange={(e) => onBuildingChange('numFloors', parseInt(e.target.value))}
-                                min="1"
-                                max="10"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="infiltrationRate">Infiltration Rate (ACH)</Label>
-                            <Input
-                                id="infiltrationRate"
-                                type="number"
-                                value={buildingData.infiltrationRate}
-                                onChange={(e) => onBuildingChange('infiltrationRate', parseFloat(e.target.value))}
-                                onBlur={(e) => onBuildingChange('infiltrationRate', Number(parseFloat(e.target.value).toFixed(2)))}
-                                step="0.01"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="buildingType">Building Type</Label>
-                            <Select
-                                value={buildingData.buildingType}
-                                onValueChange={(value) => onBuildingChange('buildingType', value)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="detached">Detached House</SelectItem>
-                                    <SelectItem value="end_terrace">End Terrace</SelectItem>
-                                    <SelectItem value="mid_terrace">Mid Terrace</SelectItem>
-                                    <SelectItem value="bungalow">Bungalow</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="constructionType">Construction Type</Label>
-                            <Select
-                                value={buildingData.constructionType}
-                                onValueChange={(value) => onBuildingChange('constructionType', value)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="standard">Standard</SelectItem>
-                                    <SelectItem value="terrace">Terrace</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+        <Card className="border-primary/20 bg-card/40">
+            <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/20 rounded">
+                        <Home className="h-5 w-5 text-primary" />
                     </div>
-                </CardContent>
-            </Card>
-        </motion.div>
+                    <div>
+                        <CardTitle className="text-sm font-mono tracking-widest uppercase">STRUCTURAL_PARAMETERS</CardTitle>
+                        <CardDescription className="text-[10px] font-mono uppercase opacity-70">
+                            Configure building structural telemetry
+                        </CardDescription>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <Label className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                            <Ruler className="h-3 w-3" /> TOTAL_FLOOR_AREA (m²)
+                        </Label>
+                        <Input
+                            type="number"
+                            value={buildingData.floorArea}
+                            onChange={(e) => onBuildingChange({ floorArea: parseFloat(e.target.value) || 0 })}
+                            className="bg-slate-900/50 border-primary/20 font-mono text-xs"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                            <Layers className="h-3 w-3" /> NUMBER_OF_FLOORS
+                        </Label>
+                        <Input
+                            type="number"
+                            value={buildingData.numFloors}
+                            onChange={(e) => onBuildingChange({ numFloors: parseInt(e.target.value) || 0 })}
+                            className="bg-slate-900/50 border-primary/20 font-mono text-xs"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                            <Wind className="h-3 w-3" /> INFILTRATION_RATE (ACH)
+                        </Label>
+                        <Input
+                            type="number"
+                            step="0.1"
+                            value={buildingData.infiltrationRate}
+                            onChange={(e) => onBuildingChange({ infiltrationRate: parseFloat(e.target.value) || 0 })}
+                            className="bg-slate-900/50 border-primary/20 font-mono text-xs"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                            <Building className="h-3 w-3" /> BUILDING_CLASSIFICATION
+                        </Label>
+                        <Select
+                            value={buildingData.buildingType}
+                            onValueChange={(value) => onBuildingChange({ buildingType: value as any })}
+                        >
+                            <SelectTrigger className="bg-slate-900/50 border-primary/20 font-mono text-[10px] uppercase">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="font-mono text-xs uppercase">
+                                <SelectItem value="Residential">Residential</SelectItem>
+                                <SelectItem value="Commercial">Commercial</SelectItem>
+                                <SelectItem value="Industrial">Industrial</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
     )
 }

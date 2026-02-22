@@ -17,8 +17,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="min-h-screen relative flex flex-col bg-slate-50 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.12),rgba(255,255,255,0))] text-slate-900">
-          {children}
+        <div className="min-h-screen relative flex flex-col bg-background text-foreground grid-pattern antialiased selection:bg-primary/20 selection:text-primary">
+          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+          <div className="flex-1 relative z-10">
+            {children}
+          </div>
         </div>
       </body>
     </html>

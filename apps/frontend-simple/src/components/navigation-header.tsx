@@ -29,8 +29,8 @@ export function NavigationHeader({ title, showBackButton }: NavigationHeaderProp
   const { isConnected, lastCheck, checkConnection } = useApiConnection()
 
   return (
-    <header className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4 max-w-7xl">
+    <header className="border-b border-primary/20 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 font-mono">
+      <div className="container mx-auto px-4 py-3 max-w-7xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             {shouldShowBackButton && (
@@ -41,20 +41,20 @@ export function NavigationHeader({ title, showBackButton }: NavigationHeaderProp
               </Button>
             )}
             <div className="flex items-center space-x-2">
-              <Thermometer className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-bold text-foreground">
-                {title || 'Heat Demand Predictor'}
+              <Thermometer className="h-5 w-5 text-primary" />
+              <h1 className="text-sm font-bold tracking-tighter text-white uppercase">
+                {title || 'HEAT_DEMAND_PRED_V1.0'}
               </h1>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-4">
-            <ApiStatus 
-              isConnected={isConnected} 
+            <ApiStatus
+              isConnected={isConnected}
               lastCheck={lastCheck}
               onRetry={checkConnection}
             />
-            
+
             <nav className="hidden lg:flex items-center space-x-1">
               {navigationItems.map((item) => (
                 <Button
@@ -62,6 +62,10 @@ export function NavigationHeader({ title, showBackButton }: NavigationHeaderProp
                   variant={pathname === item.href ? "default" : "ghost"}
                   size="sm"
                   asChild
+                  className={cn(
+                    "text-[10px] uppercase tracking-widest h-8 px-3 transition-all",
+                    pathname === item.href ? "bg-primary/20 text-primary border border-primary/30" : "text-muted-foreground hover:text-white"
+                  )}
                 >
                   <Link href={item.href}>{item.label}</Link>
                 </Button>
@@ -69,7 +73,7 @@ export function NavigationHeader({ title, showBackButton }: NavigationHeaderProp
             </nav>
           </div>
         </div>
-        
+
         {/* Mobile Navigation */}
         <nav className="lg:hidden mt-4 flex flex-wrap gap-2">
           {navigationItems.map((item) => (
