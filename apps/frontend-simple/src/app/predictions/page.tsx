@@ -19,13 +19,18 @@ import {
   Clock,
   Zap,
   BarChart3,
-  Table,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Target,
+  Activity,
+  ShieldCheck,
+  Cpu
 } from 'lucide-react'
-import { weatherService, type WeatherData, type WeatherForecast } from '@/lib/weather'
-import { apiService } from '@/lib/api'
+import { weatherService, type WeatherForecast } from '@/lib/weather'
+import { apiService, type WeatherData } from '@/lib/api'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
+import { motion } from 'framer-motion'
+import { cn } from '@/lib/utils'
 
 interface BuildingSpecs {
   buildingType: string
@@ -56,34 +61,54 @@ interface PredictionSummary {
 }
 
 const timeHorizons = [
-  { value: 1, label: "1 Hour" },
-  { value: 3, label: "3 Hours" },
-  { value: 6, label: "6 Hours" },
-  { value: 12, label: "12 Hours" },
-  { value: 24, label: "24 Hours" }
+  { value: 1, label: "1 HOUR PHASE" },
+  { value: 3, label: "3 HOUR PHASE" },
+  { value: 6, label: "6 HOUR PHASE" },
+  { value: 12, label: "12 HOUR PHASE" },
+  { value: 24, label: "24 HOUR PHASE" }
 ]
 
 const buildingTypes = [
-  { value: "detached", label: "Detached House" },
-  { value: "semi_detached", label: "Semi-Detached House" },
-  { value: "terraced", label: "Terraced House" },
-  { value: "bungalow", label: "Bungalow" },
-  { value: "apartment", label: "Apartment" }
+  { value: "detached", label: "DETACHED_HOUSE" },
+  { value: "semi_detached", label: "SEMI_DETACHED" },
+  { value: "terraced", label: "TERRACED_HOUSE" },
+  { value: "bungalow", label: "BUNGALOW" },
+  { value: "apartment", label: "APARTMENT" }
 ]
 
 const insulationLevels = [
-  { value: "poor", label: "Poor (Pre-1980)" },
-  { value: "basic", label: "Basic (1980-2000)" },
-  { value: "good", label: "Good (2000-2010)" },
-  { value: "excellent", label: "Excellent (Post-2010)" }
+  { value: "poor", label: "POOR (PRE-1980)" },
+  { value: "basic", label: "BASIC (1980-2000)" },
+  { value: "good", label: "GOOD (2000-2010)" },
+  { value: "excellent", label: "EXCELLENT (POST-2010)" }
 ]
 
-const heatingSystems = [
-  { value: "gas_boiler", label: "Gas Boiler" },
-  { value: "electric", label: "Electric Heating" },
-  { value: "heat_pump", label: "Heat Pump" },
-  { value: "district_heating", label: "District Heating" }
-]
+const containerPresets = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.1 } }
+};
+
+const itemPresets = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-background/90 backdrop-blur-md border border-primary/30 p-3 rounded-lg shadow-2xl font-mono text-xs">
+        <p className="text-muted-foreground uppercase mb-1">HORIZON: {label}H</p>
+        {payload.map((p: any, i: number) => (
+          <p key={i} className="font-bold flex justify-between gap-4" style={{ color: p.color }}>
+            <span>{p.name.toUpperCase()}:</span>
+            <span>{p.value.toFixed(2)}</span>
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function PredictionsPage() {
   const [buildingSpecs, setBuildingSpecs] = useState<BuildingSpecs>({
@@ -105,17 +130,19 @@ export default function PredictionsPage() {
 
   const fetchWeatherForecast = async () => {
     try {
-      const forecast = await weatherService.getWeatherForecast('London', timeHorizon)
+      const { forecast, locationName } = await weatherService.getWeatherForecast(undefined, timeHorizon)
       setWeatherData(forecast)
+      // If we wanted to show location name, we could add a state for it here
+      console.log(`[Predictions] Resolved location: ${locationName}`)
     } catch (err) {
       console.error('Failed to fetch weather forecast:', err)
-      setError('Failed to fetch weather data')
+      setError('SIGNAL_ERROR: WEATHER_DEGRADED')
     }
   }
 
   const generatePredictions = async () => {
     if (!weatherData.length) {
-      setError('Weather data not available')
+      setError('SIGNAL_ERROR: WEATHER_DATA_NULL')
       return
     }
 
@@ -130,8 +157,7 @@ export default function PredictionsPage() {
         const timestamp = new Date()
         timestamp.setHours(timestamp.getHours() + i)
 
-        // Build clean API payloads
-        const weatherPayload = {
+        const weatherPayload: WeatherData = {
           temperature: weather.temperature,
           humidity: weather.humidity,
           windSpeed: weather.windSpeed,
@@ -148,7 +174,6 @@ export default function PredictionsPage() {
           occupancy: buildingSpecs.occupancy
         }
 
-        // Make prediction using the API
         const prediction = await apiService.predictSingle(weatherPayload, buildingPayload, timestamp.toISOString())
 
         results.push({
@@ -164,7 +189,6 @@ export default function PredictionsPage() {
 
       setPredictions(results)
 
-      // Calculate summary
       const demands = results.map(r => r.heatDemand)
       const totalDemand = demands.reduce((sum, demand) => sum + demand, 0)
       const peakDemand = Math.max(...demands)
@@ -181,7 +205,7 @@ export default function PredictionsPage() {
 
     } catch (err) {
       console.error('Prediction failed:', err)
-      setError('Failed to generate predictions')
+      setError('SIGNAL_ERROR: INFERENCE_FAILURE')
     } finally {
       setLoading(false)
     }
@@ -191,390 +215,261 @@ export default function PredictionsPage() {
     fetchWeatherForecast()
   }, [timeHorizon])
 
-  const handlePredict = () => {
-    generatePredictions()
-  }
-
-  const formatTime = (timestamp: string) => {
-    return new Date(timestamp).toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
-
-  const getDemandColor = (demand: number) => {
-    if (demand > 15) return 'text-red-600'
-    if (demand > 10) return 'text-orange-600'
-    if (demand > 5) return 'text-yellow-600'
-    return 'text-green-600'
-  }
-
   return (
-    <div className="flex-1 w-full">
-      <NavigationHeader title="Heat Demand Predictions" showBackButton />
+    <div className="flex-1 w-full bg-slate-950/20">
+      <NavigationHeader title="CONTROL CENTER: FORECAST_MATRIX" showBackButton />
 
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Building Specifications */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Home className="h-5 w-5" />
-              Building Specifications
-            </CardTitle>
-            <CardDescription>
-              Configure your building parameters for heat demand prediction
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="buildingType">Building Type</Label>
-                <Select
-                  value={buildingSpecs.buildingType}
-                  onValueChange={(value) => setBuildingSpecs(prev => ({ ...prev, buildingType: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {buildingTypes.map(type => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="floorArea">Floor Area (m²)</Label>
-                <Input
-                  type="number"
-                  value={buildingSpecs.floorArea}
-                  onChange={(e) => setBuildingSpecs(prev => ({ ...prev, floorArea: Number(e.target.value) }))}
-                  onBlur={(e) => setBuildingSpecs(prev => ({ ...prev, floorArea: Number(Number(e.target.value).toFixed(2)) }))}
-                  min="20"
-                  max="500"
-                  step="0.01"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="numFloors">Number of Floors</Label>
-                <Input
-                  type="number"
-                  value={buildingSpecs.numFloors}
-                  onChange={(e) => setBuildingSpecs(prev => ({ ...prev, numFloors: parseInt(e.target.value) || 1 }))}
-                  min="1"
-                  max="5"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="constructionYear">Construction Year</Label>
-                <Input
-                  type="number"
-                  value={buildingSpecs.constructionYear}
-                  onChange={(e) => setBuildingSpecs(prev => ({ ...prev, constructionYear: Number(e.target.value) }))}
-                  min="1900"
-                  max="2024"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="insulationLevel">Insulation Level</Label>
-                <Select
-                  value={buildingSpecs.insulationLevel}
-                  onValueChange={(value) => setBuildingSpecs(prev => ({ ...prev, insulationLevel: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {insulationLevels.map(level => (
-                      <SelectItem key={level.value} value={level.value}>
-                        {level.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="occupancy">Occupancy</Label>
-                <Input
-                  type="number"
-                  value={buildingSpecs.occupancy}
-                  onChange={(e) => setBuildingSpecs(prev => ({ ...prev, occupancy: parseInt(e.target.value) || 1 }))}
-                  min="1"
-                  max="10"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="heatingSystem">Heating System</Label>
-                <Select
-                  value={buildingSpecs.heatingSystem}
-                  onValueChange={(value) => setBuildingSpecs(prev => ({ ...prev, heatingSystem: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {heatingSystems.map(system => (
-                      <SelectItem key={system.value} value={system.value}>
-                        {system.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Prediction Controls */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Prediction Settings
-            </CardTitle>
-            <CardDescription>
-              Configure prediction time horizon and generate heat demand forecasts
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="timeHorizon">Time Horizon</Label>
-                <Select value={timeHorizon.toString()} onValueChange={(value) => setTimeHorizon(Number(value))}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeHorizons.map(horizon => (
-                      <SelectItem key={horizon.value} value={horizon.value.toString()}>
-                        {horizon.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button
-                onClick={handlePredict}
-                disabled={loading || !weatherData.length}
-                className="flex items-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Zap className="h-4 w-4" />
-                    Generate Predictions
-                  </>
-                )}
-              </Button>
-
-              {error && (
-                <div className="flex items-center gap-2 text-red-600">
-                  <AlertCircle className="h-4 w-4" />
-                  <span className="text-sm">{error}</span>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Results */}
-        {predictions.length > 0 && summary && (
-          <>
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Demand</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{summary.totalDemand.toFixed(1)} kWh</div>
-                  <p className="text-xs text-muted-foreground">
-                    Over {summary.totalHours} hours
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Peak Demand</CardTitle>
-                  <Zap className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{summary.peakDemand.toFixed(1)} kW</div>
-                  <p className="text-xs text-muted-foreground">
-                    At hour {summary.peakHour}
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Average Demand</CardTitle>
-                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{summary.averageDemand.toFixed(1)} kW</div>
-                  <p className="text-xs text-muted-foreground">
-                    Per hour
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Weather Status</CardTitle>
-                  <Thermometer className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{predictions[0].temperature.toFixed(1)}°C</div>
-                  <p className="text-xs text-muted-foreground">
-                    Current temperature
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Charts and Tables */}
-            <Tabs defaultValue="chart" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="chart">Chart View</TabsTrigger>
-                <TabsTrigger value="table">Table View</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="chart" className="space-y-4">
-                <Card>
+      <div className="container mx-auto px-4 py-8 max-w-7xl space-y-8">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={containerPresets}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            <div className="space-y-8">
+              <motion.div variants={itemPresets}>
+                <Card className="border-primary/20 bg-card/40">
                   <CardHeader>
-                    <CardTitle>Heat Demand Forecast</CardTitle>
-                    <CardDescription>
-                      Hourly heat demand predictions based on weather forecast
-                    </CardDescription>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/20 rounded">
+                        <Home className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-sm font-mono tracking-widest uppercase">STRUCTURAL_PARAMETERS</CardTitle>
+                        <CardDescription className="text-[10px] font-mono uppercase opacity-70">Configure building structural telemetry</CardDescription>
+                      </div>
+                    </div>
                   </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={400}>
-                      <LineChart data={predictions}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis
-                          dataKey="hour"
-                          label={{ value: 'Hour', position: 'insideBottom', offset: -10 }}
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">BUILDING_CLASS</Label>
+                        <Select value={buildingSpecs.buildingType} onValueChange={(v) => setBuildingSpecs(p => ({ ...p, buildingType: v }))}>
+                          <SelectTrigger className="bg-slate-900/50 border-primary/20 font-mono text-xs uppercase"><SelectValue /></SelectTrigger>
+                          <SelectContent className="font-mono text-xs uppercase">
+                            {buildingTypes.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">FLOOR_AREA (m²)</Label>
+                        <Input
+                          type="number"
+                          value={buildingSpecs.floorArea}
+                          onChange={(e) => setBuildingSpecs(p => ({ ...p, floorArea: Number(e.target.value) }))}
+                          className="bg-slate-900/50 border-primary/20 font-mono text-xs"
                         />
-                        <YAxis
-                          label={{ value: 'Heat Demand (kW)', angle: -90, position: 'insideLeft' }}
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">INSULATION_FACTOR</Label>
+                        <Select value={buildingSpecs.insulationLevel} onValueChange={(v) => setBuildingSpecs(p => ({ ...p, insulationLevel: v }))}>
+                          <SelectTrigger className="bg-slate-900/50 border-primary/20 font-mono text-xs uppercase"><SelectValue /></SelectTrigger>
+                          <SelectContent className="font-mono text-xs uppercase">
+                            {insulationLevels.map(l => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">OCCUPANCY_LOAD</Label>
+                        <Input
+                          type="number"
+                          value={buildingSpecs.occupancy}
+                          onChange={(e) => setBuildingSpecs(p => ({ ...p, occupancy: parseInt(e.target.value) || 1 }))}
+                          className="bg-slate-900/50 border-primary/20 font-mono text-xs"
                         />
-                        <Tooltip
-                          formatter={(value: number) => [`${value.toFixed(1)} kW`, 'Heat Demand']}
-                          labelFormatter={(label) => `Hour ${label}`}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="heatDemand"
-                          stroke="#3b82f6"
-                          strokeWidth={2}
-                          dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Temperature vs Demand</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={predictions}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="hour" />
-                          <YAxis yAxisId="left" />
-                          <YAxis yAxisId="right" orientation="right" />
-                          <Tooltip />
-                          <Line yAxisId="left" type="monotone" dataKey="temperature" stroke="#ef4444" />
-                          <Line yAxisId="right" type="monotone" dataKey="heatDemand" stroke="#3b82f6" />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Demand Distribution</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={predictions}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="hour" />
-                          <YAxis />
-                          <Tooltip formatter={(value: number) => [`${value.toFixed(1)} kW`, 'Heat Demand']} />
-                          <Bar dataKey="heatDemand" fill="#3b82f6" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="table">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Hourly Breakdown</CardTitle>
-                    <CardDescription>
-                      Detailed hourly predictions with weather conditions
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="text-left p-2">Hour</th>
-                            <th className="text-left p-2">Time</th>
-                            <th className="text-left p-2">Heat Demand</th>
-                            <th className="text-left p-2">Temperature</th>
-                            <th className="text-left p-2">Humidity</th>
-                            <th className="text-left p-2">Wind Speed</th>
-                            <th className="text-left p-2">Solar Radiation</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {predictions.map((prediction, index) => (
-                            <tr key={index} className="border-b hover:bg-gray-50">
-                              <td className="p-2 font-medium">{prediction.hour}</td>
-                              <td className="p-2">{formatTime(prediction.timestamp)}</td>
-                              <td className={`p-2 font-bold ${getDemandColor(prediction.heatDemand)}`}>
-                                {prediction.heatDemand.toFixed(1)} kW
-                              </td>
-                              <td className="p-2">{prediction.temperature.toFixed(1)}°C</td>
-                              <td className="p-2">{prediction.humidity}%</td>
-                              <td className="p-2">{prediction.windSpeed.toFixed(1)} m/s</td>
-                              <td className="p-2">{prediction.solarRadiation.toFixed(0)} W/m²</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
-            </Tabs>
-          </>
-        )}
-      </main>
+
+                <Card className="border-primary/20 bg-card/40 mt-8">
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/20 rounded">
+                        <Clock className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-sm font-mono tracking-widest uppercase">TEMPORAL_HORIZON</CardTitle>
+                        <CardDescription className="text-[10px] font-mono uppercase opacity-70">Simulation Window Buffer</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="flex items-center gap-6">
+                      <div className="flex-1 space-y-2">
+                        <Label className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">WINDOW_RANGE</Label>
+                        <Select value={timeHorizon.toString()} onValueChange={(v) => setTimeHorizon(Number(v))}>
+                          <SelectTrigger className="bg-slate-900/50 border-primary/20 font-mono text-xs uppercase"><SelectValue /></SelectTrigger>
+                          <SelectContent className="font-mono text-xs uppercase">
+                            {timeHorizons.map(h => <SelectItem key={h.value} value={h.value.toString()}>{h.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button
+                        onClick={generatePredictions}
+                        disabled={loading || !weatherData.length}
+                        className="h-12 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-mono font-bold tracking-[0.1em]"
+                      >
+                        {loading ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Zap className="h-4 w-4 mr-2" />}
+                        INIT_SIMULATION
+                      </Button>
+                    </div>
+                    {error && (
+                      <div className="p-3 bg-destructive/10 border border-destructive/30 rounded flex items-center gap-2 text-destructive font-mono text-[10px] uppercase">
+                        <AlertCircle className="h-3 w-3" /> {error}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div variants={itemPresets}>
+                <Card className="border-accent/20 bg-slate-900/60 transition-all border-l-4 border-l-accent text-mono uppercase">
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-accent/20 rounded">
+                        <Cpu className="h-5 w-5 text-accent" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-sm font-mono tracking-widest uppercase">INFERENCE_OUTPUT_MATRIX</CardTitle>
+                        <CardDescription className="text-[10px] font-mono uppercase opacity-70">Validated Prediction Summary</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-8">
+                    {summary ? (
+                      <div className="grid grid-cols-2 gap-4">
+                        {[
+                          { label: 'TOTAL_DEMAND', value: `${summary.totalDemand.toFixed(1)} kWh`, icon: TrendingUp },
+                          { label: 'PEAK_LOAD', value: `${summary.peakDemand.toFixed(1)} kW`, icon: Zap },
+                          { label: 'MEAN_DEMAND', value: `${summary.averageDemand.toFixed(1)} kW`, icon: BarChart3 },
+                          { label: 'CURR_TEMP', value: `${predictions[0]?.temperature.toFixed(1)}°C`, icon: Thermometer },
+                        ].map((s, i) => (
+                          <div key={i} className="p-4 bg-black/40 border border-white/5 rounded-lg space-y-1">
+                            <div className="text-[10px] font-mono text-muted-foreground uppercase flex items-center gap-2">
+                              <s.icon className="h-3 w-3" /> {s.label}
+                            </div>
+                            <div className="text-xl font-bold font-mono text-white">{s.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-20 border border-dashed border-white/10 rounded-lg">
+                        <Target className="h-12 w-12 mx-auto mb-4 opacity-10 text-primary" />
+                        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-[0.2em]">Awaiting Simulation Sequence...</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+
+            {predictions.length > 0 && (
+              <div className="space-y-8">
+                <motion.div variants={itemPresets}>
+                  <Tabs defaultValue="chart" className="space-y-6">
+                    <TabsList className="bg-slate-900/50 border border-border/50 p-1 rounded-xl h-12 w-full max-w-md mx-auto grid grid-cols-2">
+                      <TabsTrigger value="chart" className="font-mono text-[10px] tracking-widest uppercase">VISUAL_TRACE</TabsTrigger>
+                      <TabsTrigger value="table" className="font-mono text-[10px] tracking-widest uppercase">RAW_TELEMETRY</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="chart" className="space-y-8">
+                      <Card className="border-primary/20 bg-card/40">
+                        <CardHeader>
+                          <CardTitle className="text-sm font-mono tracking-widest uppercase">THERMAL_DEMAND_PROJECTION</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="h-[400px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart data={predictions}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.3)" />
+                                <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontFamily: 'monospace' }} tickFormatter={v => `${v}H`} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontFamily: 'monospace' }} />
+                                <Tooltip content={<CustomTooltip />} />
+                                <Line type="monotone" dataKey="heatDemand" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 4, fill: 'hsl(var(--primary))' }} name="LOAD" />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <Card className="border-border/50 bg-card/30">
+                          <CardHeader><CardTitle className="text-xs font-mono uppercase">Node_Correlations</CardTitle></CardHeader>
+                          <CardContent>
+                            <div className="h-[300px]">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={predictions}>
+                                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.1)" />
+                                  <XAxis dataKey="hour" hide />
+                                  <YAxis yAxisId="left" hide />
+                                  <YAxis yAxisId="right" orientation="right" hide />
+                                  <Tooltip content={<CustomTooltip />} />
+                                  <Line yAxisId="left" type="stepAfter" dataKey="temperature" stroke="hsl(var(--chart-5))" strokeWidth={2} dot={false} name="TEMP" />
+                                  <Line yAxisId="right" type="stepAfter" dataKey="heatDemand" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name="LOAD" />
+                                </LineChart>
+                              </ResponsiveContainer>
+                            </div>
+                          </CardContent>
+                        </Card>
+                        <Card className="border-border/50 bg-card/30">
+                          <CardHeader><CardTitle className="text-xs font-mono uppercase">Phasic_Distribution</CardTitle></CardHeader>
+                          <CardContent>
+                            <div className="h-[300px]">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={predictions}>
+                                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.1)" />
+                                  <XAxis dataKey="hour" hide />
+                                  <YAxis hide />
+                                  <Tooltip content={<CustomTooltip />} />
+                                  <Bar dataKey="heatDemand" fill="hsl(var(--primary) / 0.6)" radius={[2, 2, 0, 0]} />
+                                </BarChart>
+                              </ResponsiveContainer>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="table">
+                      <Card className="border-border/50 bg-card/40">
+                        <CardContent className="pt-6">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-[10px] font-mono uppercase">
+                              <thead>
+                                <tr className="border-b border-border/20 text-muted-foreground">
+                                  <th className="p-3 text-left">PHASE</th>
+                                  <th className="p-3 text-left">STAMP</th>
+                                  <th className="p-3 text-left text-primary">DEMAND_KW</th>
+                                  <th className="p-3 text-left">TEMP_C</th>
+                                  <th className="p-3 text-left font-bold opacity-50">STATUS</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {predictions.map((p, i) => (
+                                  <tr key={i} className="border-b border-border/10 hover:bg-white/5 transition-colors">
+                                    <td className="p-3">T+{p.hour}H</td>
+                                    <td className="p-3 opacity-50">{new Date(p.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
+                                    <td className="p-3 font-bold text-accent">{p.heatDemand.toFixed(3)}</td>
+                                    <td className="p-3">{p.temperature.toFixed(1)}°</td>
+                                    <td className="p-3">
+                                      <Badge variant="outline" className="text-[8px] font-mono border-primary/20 text-primary h-4 px-1">VALID</Badge>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                  </Tabs>
+                </motion.div>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </div>
     </div>
   )
 }

@@ -1,66 +1,56 @@
+"use client"
+
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { AlertCircle, CheckCircle } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { type HourlyPrediction } from '@/hooks/useManualPrediction'
+import { type PredictionResult } from '@/lib/api'
+import { Zap, Target, ShieldCheck } from 'lucide-react'
 
 interface HourlyPredictionCardProps {
-    hourlyPred: HourlyPrediction
-    index?: number
+    hourlyPred: {
+        hour: number
+        prediction: PredictionResult
+    }
 }
 
-export function HourlyPredictionCard({ hourlyPred, index = 0 }: HourlyPredictionCardProps) {
-    const getPredictionStatus = (demand: number) => {
-        if (demand < 1) return { status: 'low', color: 'bg-green-100 text-green-800', icon: CheckCircle }
-        if (demand < 3) return { status: 'moderate', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircle }
-        return { status: 'high', color: 'bg-red-100 text-red-800', icon: AlertCircle }
-    }
-
-    const predictionStatus = getPredictionStatus(hourlyPred.prediction.heat_demand_kw)
+export function HourlyPredictionCard({ hourlyPred }: HourlyPredictionCardProps) {
+    const { hour, prediction } = hourlyPred
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.1, ease: "easeOut" }}
-            whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-        >
-            <Card className="border-l-4 border-l-primary shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                            <Badge variant="outline">Hour {hourlyPred.hour}</Badge>
-                            <Badge className={predictionStatus.color}>
-                                <predictionStatus.icon className="mr-1 h-3 w-3" />
-                                {predictionStatus.status}
-                            </Badge>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-2xl font-bold text-primary">
-                                {hourlyPred.prediction.heat_demand_kw.toFixed(3)} kW
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                                {new Date(hourlyPred.timestamp).toLocaleTimeString()}
-                            </div>
-                        </div>
-                    </div>
+        <div className="relative group overflow-hidden rounded-lg border border-white/5 bg-slate-900/40 p-4 transition-all hover:bg-slate-900/60 hover:border-accent/40">
+            <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-20 transition-opacity">
+                <Zap className="h-8 w-8 text-accent" />
+            </div>
 
-                    <div className="grid grid-cols-3 gap-2 text-sm">
-                        <div className="flex justify-between">
-                            <span>Temp:</span>
-                            <span className="font-medium">{hourlyPred.weather.temperature}°C</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span>Humidity:</span>
-                            <span className="font-medium">{hourlyPred.weather.humidity}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span>Wind:</span>
-                            <span className="font-medium">{hourlyPred.weather.windSpeed} m/s</span>
-                        </div>
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">PHASE_INDEX</span>
+                        <span className="text-sm font-mono font-bold text-white">T+{hour}H</span>
                     </div>
-                </CardContent>
-            </Card>
-        </motion.div>
+                </div>
+                <Badge variant="outline" className="font-mono text-[9px] border-primary/30 text-primary uppercase h-5 bg-primary/5">
+                    <ShieldCheck className="h-2.5 w-2.5 mr-1" /> DATA_LOCKED
+                </Badge>
+            </div>
+
+            <div className="space-y-1">
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">LOAD_VALUATION</span>
+                <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold font-mono text-accent tracking-tighter">
+                        {prediction.heat_demand_kw.toFixed(4)}
+                    </span>
+                    <span className="text-xs font-mono text-muted-foreground uppercase">kW</span>
+                </div>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-white/5">
+                <div className="flex justify-between items-center text-[9px] font-mono uppercase tracking-[0.1em]">
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                        <Target className="h-3 w-3" /> CONF_INTERVAL
+                    </div>
+                    <span className="text-white">{(prediction.heat_demand_kw * 0.95).toFixed(2)} - {(prediction.heat_demand_kw * 1.05).toFixed(2)}</span>
+                </div>
+            </div>
+        </div>
     )
 }

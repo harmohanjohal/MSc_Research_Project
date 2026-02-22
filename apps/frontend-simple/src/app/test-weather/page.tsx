@@ -12,11 +12,11 @@ export default function TestWeatherPage() {
     const testWeatherAPI = async () => {
       try {
         setStatus('Testing API availability...')
-        
+
         // Test 1: Check if API key is loaded
         const apiKey = process.env.NEXT_PUBLIC_WEATHER_API_KEY
         console.log('API Key in browser:', apiKey ? `${apiKey.substring(0, 8)}...` : 'NOT FOUND')
-        
+
         if (!apiKey) {
           setError('API key not found in environment variables')
           setStatus('Failed')
@@ -24,12 +24,12 @@ export default function TestWeatherPage() {
         }
 
         setStatus('Testing current weather...')
-        
+
         // Test 2: Get current weather
-        const currentWeather = await weatherService.getCurrentWeather('London')
+        const currentWeather = await weatherService.getCurrentWeather(undefined)
         setWeatherData(currentWeather)
         setStatus('Success!')
-        
+
       } catch (err) {
         console.error('Weather API test failed:', err)
         setError(err instanceof Error ? err.message : 'Unknown error')
@@ -43,7 +43,7 @@ export default function TestWeatherPage() {
   return (
     <div className="container mx-auto p-6 max-w-2xl">
       <h1 className="text-2xl font-bold mb-6">Weather API Test</h1>
-      
+
       <div className="space-y-4">
         <div className="p-4 border rounded">
           <h2 className="font-semibold mb-2">Status: {status}</h2>

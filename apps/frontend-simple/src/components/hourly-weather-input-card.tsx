@@ -3,109 +3,56 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Thermometer } from 'lucide-react'
-import { motion } from 'framer-motion'
 import { type WeatherData } from '@/lib/api'
+import { Thermometer, Droplets, Wind, Cloud, Sun, Gauge } from 'lucide-react'
 
 interface HourlyWeatherInputCardProps {
     hour: number
-    weatherData: WeatherData
-    onWeatherChange: (hour: number, field: keyof WeatherData, value: number) => void
-    index?: number
+    weatherData: Partial<WeatherData>
+    onWeatherChange: (hour: number, data: Partial<WeatherData>) => void
 }
 
-export function HourlyWeatherInputCard({ hour, weatherData, onWeatherChange, index = 0 }: HourlyWeatherInputCardProps) {
+export function HourlyWeatherInputCard({ hour, weatherData, onWeatherChange }: HourlyWeatherInputCardProps) {
+    const handleChange = (field: keyof WeatherData, value: string) => {
+        onWeatherChange(hour, { [field]: parseFloat(value) || 0 })
+    }
+
     return (
-        <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.15, ease: "easeOut" }}
-        >
-            <Card className="shadow-sm hover:shadow-md transition-shadow duration-300">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Thermometer className="h-5 w-5" />
-                        Hour {hour} Weather Conditions
+        <Card className="border-border/50 bg-card/30">
+            <CardHeader className="py-3 border-b border-border/10">
+                <div className="flex items-center justify-between">
+                    <CardTitle className="text-xs font-mono tracking-widest uppercase flex items-center gap-2">
+                        <div className="w-2 h-2 bg-primary rounded-full" /> T+{hour}H_ARRAY
                     </CardTitle>
-                    <CardDescription>
-                        Weather parameters for hour {hour}
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor={`temp-${hour}`}>Temperature (°C)</Label>
+                    <span className="text-[9px] font-mono text-muted-foreground uppercase">Sensor_Input_Buffer</span>
+                </div>
+            </CardHeader>
+            <CardContent className="pt-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {[
+                        { id: 'temperature', label: 'TEMP (°C)', icon: Thermometer },
+                        { id: 'humidity', label: 'HUMID (%)', icon: Droplets },
+                        { id: 'windSpeed', label: 'WIND (m/s)', icon: Wind },
+                        { id: 'cloudCover', label: 'CLOUD (%)', icon: Cloud },
+                        { id: 'solarRadiation', label: 'SOLAR (W/m²)', icon: Sun },
+                        { id: 'pressure', label: 'PRESS (Pa)', icon: Gauge },
+                    ].map((field) => (
+                        <div key={field.id} className="space-y-1.5">
+                            <Label className="text-[9px] font-mono text-muted-foreground uppercase flex items-center gap-1.5">
+                                <field.icon className="h-2.5 w-2.5" /> {field.label}
+                            </Label>
                             <Input
-                                id={`temp-${hour}`}
                                 type="number"
-                                value={weatherData?.temperature || 0}
-                                onChange={(e) => onWeatherChange(hour, 'temperature', parseFloat(e.target.value))}
-                                onBlur={(e) => onWeatherChange(hour, 'temperature', Number(parseFloat(e.target.value).toFixed(2)))}
-                                step="0.01"
+                                step={field.id === 'pressure' ? '100' : '0.1'}
+                                value={(weatherData as any)[field.id] || ''}
+                                onChange={(e) => handleChange(field.id as any, e.target.value)}
+                                placeholder="0.0"
+                                className="h-8 bg-slate-950/50 border-primary/10 font-mono text-[10px] focus-visible:ring-primary/30"
                             />
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor={`humidity-${hour}`}>Humidity (%)</Label>
-                            <Input
-                                id={`humidity-${hour}`}
-                                type="number"
-                                value={weatherData?.humidity || 0}
-                                onChange={(e) => onWeatherChange(hour, 'humidity', parseFloat(e.target.value))}
-                                onBlur={(e) => onWeatherChange(hour, 'humidity', Number(parseFloat(e.target.value).toFixed(2)))}
-                                min="0"
-                                max="100"
-                                step="0.01"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor={`wind-${hour}`}>Wind Speed (m/s)</Label>
-                            <Input
-                                id={`wind-${hour}`}
-                                type="number"
-                                value={weatherData?.windSpeed || 0}
-                                onChange={(e) => onWeatherChange(hour, 'windSpeed', parseFloat(e.target.value))}
-                                onBlur={(e) => onWeatherChange(hour, 'windSpeed', Number(parseFloat(e.target.value).toFixed(2)))}
-                                step="0.01"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor={`solar-${hour}`}>Solar Radiation (W/m²)</Label>
-                            <Input
-                                id={`solar-${hour}`}
-                                type="number"
-                                value={weatherData?.solarRadiation || 0}
-                                onChange={(e) => onWeatherChange(hour, 'solarRadiation', parseFloat(e.target.value))}
-                                onBlur={(e) => onWeatherChange(hour, 'solarRadiation', Number(parseFloat(e.target.value).toFixed(2)))}
-                                step="0.01"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor={`cloud-${hour}`}>Cloud Cover (0-10)</Label>
-                            <Input
-                                id={`cloud-${hour}`}
-                                type="number"
-                                value={weatherData?.cloudCover || 0}
-                                onChange={(e) => onWeatherChange(hour, 'cloudCover', parseFloat(e.target.value))}
-                                onBlur={(e) => onWeatherChange(hour, 'cloudCover', Number(parseFloat(e.target.value).toFixed(2)))}
-                                min="0"
-                                max="10"
-                                step="0.01"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor={`precip-${hour}`}>Precipitation (mm)</Label>
-                            <Input
-                                id={`precip-${hour}`}
-                                type="number"
-                                value={weatherData?.precipitation || 0}
-                                onChange={(e) => onWeatherChange(hour, 'precipitation', parseFloat(e.target.value))}
-                                onBlur={(e) => onWeatherChange(hour, 'precipitation', Number(parseFloat(e.target.value).toFixed(2)))}
-                                step="0.01"
-                            />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-        </motion.div>
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
     )
 }
