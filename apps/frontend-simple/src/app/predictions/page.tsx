@@ -9,14 +9,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Thermometer, 
-  Wind, 
-  Droplets, 
-  Sun, 
-  Home, 
-  TrendingUp, 
-  Clock, 
+import {
+  Thermometer,
+  Wind,
+  Droplets,
+  Sun,
+  Home,
+  TrendingUp,
+  Clock,
   Zap,
   BarChart3,
   Table,
@@ -95,7 +95,7 @@ export default function PredictionsPage() {
     occupancy: 4,
     heatingSystem: "gas_boiler"
   })
-  
+
   const [timeHorizon, setTimeHorizon] = useState(24)
   const [predictions, setPredictions] = useState<PredictionResult[]>([])
   const [summary, setSummary] = useState<PredictionSummary | null>(null)
@@ -124,102 +124,33 @@ export default function PredictionsPage() {
 
     try {
       const results: PredictionResult[] = []
-      
+
       for (let i = 0; i < timeHorizon; i++) {
         const weather = weatherData[i]
         const timestamp = new Date()
         timestamp.setHours(timestamp.getHours() + i)
-        
-        // Create features for the ML model
-        const features = {
-          // Weather features
-          DryBulbTemp: weather.temperature,
-          RelHumidity: weather.humidity,
-          WindSpeed: weather.windSpeed,
-          DirectNormRad: weather.solarRadiation,
-          DiffuseHorzRad: weather.solarRadiation * 0.3, // Estimate diffuse radiation
-          TotalSkyCover: weather.cloudCover,
-          
-          // Building features
-          floor_area_m2: buildingSpecs.floorArea,
-          num_floors: buildingSpecs.numFloors,
-          infiltration_rate: 0.5, // Default value
-          
-          // Time features
-          hour: timestamp.getHours(),
-          day: timestamp.getDate(),
-          month: timestamp.getMonth() + 1,
-          day_of_week: timestamp.getDay(),
-          is_weekend: timestamp.getDay() === 0 || timestamp.getDay() === 6 ? 1 : 0,
-          
-          // Derived features
-          hdd: Math.max(0, 18 - weather.temperature),
-          is_cold: weather.temperature < 10 ? 1 : 0,
-          is_freezing: weather.temperature < 0 ? 1 : 0,
-          
-          // Building type (one-hot encoded)
-          building_bungalow: buildingSpecs.buildingType === 'bungalow' ? 1 : 0,
-          building_detached: buildingSpecs.buildingType === 'detached' ? 1 : 0,
-          building_end_terrace: buildingSpecs.buildingType === 'terraced' ? 1 : 0,
-          building_mid_terrace: buildingSpecs.buildingType === 'terraced' ? 1 : 0,
-          
-          // Construction type
-          construction_standard: 1,
-          construction_terrace: buildingSpecs.buildingType === 'terraced' ? 1 : 0,
-          
-          // Interaction features
-          temp_wall_u_interaction: weather.temperature * 0.3, // Simplified U-value interaction
-          temp_floor_area_interaction: weather.temperature * buildingSpecs.floorArea,
-          hdd_floor_area_interaction: Math.max(0, 18 - weather.temperature) * buildingSpecs.floorArea,
-          
-          // Lag features (simplified)
-          temp_lag_1h: i > 0 ? weatherData[i-1].temperature : weather.temperature,
-          hdd_lag_1h: i > 0 ? Math.max(0, 18 - weatherData[i-1].temperature) : Math.max(0, 18 - weather.temperature),
-          temp_lag_3h: i > 2 ? weatherData[i-3].temperature : weather.temperature,
-          hdd_lag_3h: i > 2 ? Math.max(0, 18 - weatherData[i-3].temperature) : Math.max(0, 18 - weather.temperature),
-          temp_lag_6h: i > 5 ? weatherData[i-6].temperature : weather.temperature,
-          hdd_lag_6h: i > 5 ? Math.max(0, 18 - weatherData[i-6].temperature) : Math.max(0, 18 - weather.temperature),
-          temp_lag_12h: i > 11 ? weatherData[i-12].temperature : weather.temperature,
-          hdd_lag_12h: i > 11 ? Math.max(0, 18 - weatherData[i-12].temperature) : Math.max(0, 18 - weather.temperature),
-          
-          // Rolling statistics (simplified)
-          temp_rolling_mean_3h: i >= 2 ? 
-            (weatherData[i].temperature + weatherData[i-1].temperature + weatherData[i-2].temperature) / 3 : 
-            weather.temperature,
-          hdd_rolling_sum_3h: i >= 2 ? 
-            Math.max(0, 18 - weatherData[i].temperature) + 
-            Math.max(0, 18 - weatherData[i-1].temperature) + 
-            Math.max(0, 18 - weatherData[i-2].temperature) : 
-            Math.max(0, 18 - weather.temperature),
-          temp_rolling_mean_6h: i >= 5 ? 
-            weatherData.slice(i-5, i+1).reduce((sum, w) => sum + w.temperature, 0) / 6 : 
-            weather.temperature,
-          hdd_rolling_sum_6h: i >= 5 ? 
-            weatherData.slice(i-5, i+1).reduce((sum, w) => sum + Math.max(0, 18 - w.temperature), 0) : 
-            Math.max(0, 18 - weather.temperature),
-          temp_rolling_mean_12h: i >= 11 ? 
-            weatherData.slice(i-11, i+1).reduce((sum, w) => sum + w.temperature, 0) / 12 : 
-            weather.temperature,
-          hdd_rolling_sum_12h: i >= 11 ? 
-            weatherData.slice(i-11, i+1).reduce((sum, w) => sum + Math.max(0, 18 - w.temperature), 0) : 
-            Math.max(0, 18 - weather.temperature),
-          temp_rolling_mean_24h: i >= 23 ? 
-            weatherData.slice(i-23, i+1).reduce((sum, w) => sum + w.temperature, 0) / 24 : 
-            weather.temperature,
-          hdd_rolling_sum_24h: i >= 23 ? 
-            weatherData.slice(i-23, i+1).reduce((sum, w) => sum + Math.max(0, 18 - w.temperature), 0) : 
-            Math.max(0, 18 - weather.temperature),
-          
-          // Trend features (simplified)
-          temp_trend_3h: i >= 2 ? 
-            (weatherData[i].temperature - weatherData[i-2].temperature) / 2 : 0,
-          temp_trend_6h: i >= 5 ? 
-            (weatherData[i].temperature - weatherData[i-5].temperature) / 5 : 0
+
+        // Build clean API payloads
+        const weatherPayload = {
+          temperature: weather.temperature,
+          humidity: weather.humidity,
+          windSpeed: weather.windSpeed,
+          solarRadiation: weather.solarRadiation,
+          cloudCover: weather.cloudCover,
+          pressure: weather.pressure,
+          precipitation: weather.precipitation
+        }
+
+        const buildingPayload = {
+          floorArea: buildingSpecs.floorArea,
+          insulationLevel: buildingSpecs.insulationLevel,
+          buildingType: buildingSpecs.buildingType,
+          occupancy: buildingSpecs.occupancy
         }
 
         // Make prediction using the API
-        const prediction = await apiService.predictHeatDemand(features)
-        
+        const prediction = await apiService.predictSingle(weatherPayload, buildingPayload, timestamp.toISOString())
+
         results.push({
           hour: i + 1,
           heatDemand: prediction.heat_demand_kw,
@@ -232,14 +163,14 @@ export default function PredictionsPage() {
       }
 
       setPredictions(results)
-      
+
       // Calculate summary
       const demands = results.map(r => r.heatDemand)
       const totalDemand = demands.reduce((sum, demand) => sum + demand, 0)
       const peakDemand = Math.max(...demands)
       const averageDemand = totalDemand / demands.length
       const peakHour = results.find(r => r.heatDemand === peakDemand)?.hour || 1
-      
+
       setSummary({
         totalDemand,
         peakDemand,
@@ -265,9 +196,9 @@ export default function PredictionsPage() {
   }
 
   const formatTime = (timestamp: string) => {
-    return new Date(timestamp).toLocaleTimeString('en-GB', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(timestamp).toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit'
     })
   }
 
@@ -279,9 +210,9 @@ export default function PredictionsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="flex-1 w-full">
       <NavigationHeader title="Heat Demand Predictions" showBackButton />
-      
+
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Building Specifications */}
         <Card className="mb-8">
@@ -298,8 +229,8 @@ export default function PredictionsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="buildingType">Building Type</Label>
-                <Select 
-                  value={buildingSpecs.buildingType} 
+                <Select
+                  value={buildingSpecs.buildingType}
                   onValueChange={(value) => setBuildingSpecs(prev => ({ ...prev, buildingType: value }))}
                 >
                   <SelectTrigger>
@@ -321,8 +252,10 @@ export default function PredictionsPage() {
                   type="number"
                   value={buildingSpecs.floorArea}
                   onChange={(e) => setBuildingSpecs(prev => ({ ...prev, floorArea: Number(e.target.value) }))}
+                  onBlur={(e) => setBuildingSpecs(prev => ({ ...prev, floorArea: Number(Number(e.target.value).toFixed(2)) }))}
                   min="20"
                   max="500"
+                  step="0.01"
                 />
               </div>
 
@@ -331,7 +264,7 @@ export default function PredictionsPage() {
                 <Input
                   type="number"
                   value={buildingSpecs.numFloors}
-                  onChange={(e) => setBuildingSpecs(prev => ({ ...prev, numFloors: Number(e.target.value) }))}
+                  onChange={(e) => setBuildingSpecs(prev => ({ ...prev, numFloors: parseInt(e.target.value) || 1 }))}
                   min="1"
                   max="5"
                 />
@@ -350,8 +283,8 @@ export default function PredictionsPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="insulationLevel">Insulation Level</Label>
-                <Select 
-                  value={buildingSpecs.insulationLevel} 
+                <Select
+                  value={buildingSpecs.insulationLevel}
                   onValueChange={(value) => setBuildingSpecs(prev => ({ ...prev, insulationLevel: value }))}
                 >
                   <SelectTrigger>
@@ -372,7 +305,7 @@ export default function PredictionsPage() {
                 <Input
                   type="number"
                   value={buildingSpecs.occupancy}
-                  onChange={(e) => setBuildingSpecs(prev => ({ ...prev, occupancy: Number(e.target.value) }))}
+                  onChange={(e) => setBuildingSpecs(prev => ({ ...prev, occupancy: parseInt(e.target.value) || 1 }))}
                   min="1"
                   max="10"
                 />
@@ -380,8 +313,8 @@ export default function PredictionsPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="heatingSystem">Heating System</Label>
-                <Select 
-                  value={buildingSpecs.heatingSystem} 
+                <Select
+                  value={buildingSpecs.heatingSystem}
                   onValueChange={(value) => setBuildingSpecs(prev => ({ ...prev, heatingSystem: value }))}
                 >
                   <SelectTrigger>
@@ -429,8 +362,8 @@ export default function PredictionsPage() {
                 </Select>
               </div>
 
-              <Button 
-                onClick={handlePredict} 
+              <Button
+                onClick={handlePredict}
                 disabled={loading || !weatherData.length}
                 className="flex items-center gap-2"
               >
@@ -534,21 +467,21 @@ export default function PredictionsPage() {
                     <ResponsiveContainer width="100%" height={400}>
                       <LineChart data={predictions}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis 
-                          dataKey="hour" 
+                        <XAxis
+                          dataKey="hour"
                           label={{ value: 'Hour', position: 'insideBottom', offset: -10 }}
                         />
-                        <YAxis 
+                        <YAxis
                           label={{ value: 'Heat Demand (kW)', angle: -90, position: 'insideLeft' }}
                         />
-                        <Tooltip 
+                        <Tooltip
                           formatter={(value: number) => [`${value.toFixed(1)} kW`, 'Heat Demand']}
                           labelFormatter={(label) => `Hour ${label}`}
                         />
-                        <Line 
-                          type="monotone" 
-                          dataKey="heatDemand" 
-                          stroke="#3b82f6" 
+                        <Line
+                          type="monotone"
+                          dataKey="heatDemand"
+                          stroke="#3b82f6"
                           strokeWidth={2}
                           dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
                         />

@@ -36,14 +36,19 @@ class FeatureService:
         if timestamp is None:
             timestamp = datetime.now()
             
-        # Extract weather data with defaults
-        outdoor_temp = weather_data.get('temperature', 15.0)
-        wind_speed = weather_data.get('windSpeed', 5.0)
-        humidity = weather_data.get('humidity', 60.0)
-        solar_radiation = weather_data.get('solarRadiation', 400.0)
-        cloud_cover = weather_data.get('cloudCover', 50.0)
-        pressure = weather_data.get('pressure', 101325.0)
-        precipitation = weather_data.get('precipitation', 0.0)
+        # Extract weather data with defaults and robust type-casting
+        try:
+            outdoor_temp = float(weather_data.get('temperature', 15.0))
+            wind_speed = float(weather_data.get('windSpeed', 5.0))
+            humidity = float(weather_data.get('humidity', 60.0))
+            solar_radiation = float(weather_data.get('solarRadiation', 400.0))
+            cloud_cover = float(weather_data.get('cloudCover', 50.0))
+            pressure = float(weather_data.get('pressure', 101325.0))
+            precipitation = float(weather_data.get('precipitation', 0.0))
+        except (ValueError, TypeError):
+            # Fallback to sensible defaults if conversion fails completely
+            outdoor_temp, wind_speed, humidity = 15.0, 5.0, 60.0
+            solar_radiation, cloud_cover, pressure, precipitation = 400.0, 50.0, 101325.0, 0.0
         
         # Create base features
         features = {
@@ -80,12 +85,15 @@ class FeatureService:
         The model was trained on a small building (~15,000 m² equivalent)
         We need to scale features based on actual building characteristics
         """
-        # Extract building parameters with defaults
-        floor_area = building_data.get('floorArea', 15000)
-        insulation_level = building_data.get('insulationLevel', 'standard')
-        occupancy_rate = building_data.get('occupancyRate', 85)
-        building_age = building_data.get('buildingAge', 25)
-        thermostat_setpoint = building_data.get('thermostatSetpoint', 21)
+        # Extract building parameters with defaults and type-casting
+        try:
+            floor_area = float(building_data.get('floorArea', 15000))
+            insulation_level = str(building_data.get('insulationLevel', 'standard')).lower()
+            occupancy_rate = float(building_data.get('occupancyRate', 85))
+            building_age = float(building_data.get('buildingAge', 25))
+            thermostat_setpoint = float(building_data.get('thermostatSetpoint', 21))
+        except (ValueError, TypeError):
+            floor_area, insulation_level, occupancy_rate, building_age, thermostat_setpoint = 15000.0, 'standard', 85.0, 25.0, 21.0
         
         # Calculate scaling factors
         

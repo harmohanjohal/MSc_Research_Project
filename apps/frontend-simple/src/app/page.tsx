@@ -25,17 +25,17 @@ const weatherForecastFetcher = async () => {
   } catch (error) {
     console.warn('Failed to get real weather data, using fallback:', error)
   }
-  
+
   // Fallback to realistic mock data
   const forecast = Array.from({ length: 48 }, (_, i) => ({
     hour: i + 1,
-    temperature: 15 + Math.sin(i * 0.3) * 8 + Math.random() * 2,
-    humidity: 60 + Math.sin(i * 0.2) * 20 + Math.random() * 10,
-    windSpeed: 5 + Math.sin(i * 0.4) * 3 + Math.random() * 2,
-    cloudCover: 50 + Math.sin(i * 0.25) * 30 + Math.random() * 10,
-    solarRadiation: Math.max(0, 400 + Math.sin(i * 0.3) * 300 + Math.random() * 100),
-    pressure: 101325 + Math.sin(i * 0.1) * 1000 + Math.random() * 500,
-    precipitation: Math.max(0, Math.sin(i * 0.15) * 5 + Math.random() * 2)
+    temperature: Number((15 + Math.sin(i * 0.3) * 8 + Math.random() * 2).toFixed(2)),
+    humidity: Number((60 + Math.sin(i * 0.2) * 20 + Math.random() * 10).toFixed(2)),
+    windSpeed: Number((5 + Math.sin(i * 0.4) * 3 + Math.random() * 2).toFixed(2)),
+    cloudCover: Number((50 + Math.sin(i * 0.25) * 30 + Math.random() * 10).toFixed(2)),
+    solarRadiation: Number(Math.max(0, 400 + Math.sin(i * 0.3) * 300 + Math.random() * 100).toFixed(2)),
+    pressure: Number((101325 + Math.sin(i * 0.1) * 1000 + Math.random() * 500).toFixed(2)),
+    precipitation: Number(Math.max(0, Math.sin(i * 0.15) * 5 + Math.random() * 2).toFixed(2))
   }))
   return forecast
 }
@@ -44,7 +44,7 @@ const predictionTimelineFetcher = async () => {
   try {
     // Get current weather for prediction from real API
     let currentWeather: WeatherData
-    
+
     try {
       currentWeather = await weatherService.getCurrentWeather('London')
     } catch (error) {
@@ -63,7 +63,7 @@ const predictionTimelineFetcher = async () => {
     // Make predictions for different horizons using real API
     const predictions: Record<number, { demand: number; confidence: [number, number]; accuracy: number }> = {}
     const horizons = [3, 6, 12, 24, 36, 48]
-    
+
     for (const horizon of horizons) {
       try {
         const result = await apiService.predictSingle(currentWeather)
@@ -75,13 +75,13 @@ const predictionTimelineFetcher = async () => {
       } catch (error) {
         // Fallback to mock data if API fails
         predictions[horizon] = {
-          demand: 2.0 + (horizon * 0.1),
-          confidence: [1.8 + (horizon * 0.1), 2.2 + (horizon * 0.1)],
-          accuracy: 95 - (horizon * 0.3)
+          demand: Number((2.0 + (horizon * 0.1)).toFixed(2)),
+          confidence: [Number((1.8 + (horizon * 0.1)).toFixed(2)), Number((2.2 + (horizon * 0.1)).toFixed(2))],
+          accuracy: Number((95 - (horizon * 0.3)).toFixed(1))
         }
       }
     }
-    
+
     return predictions
   } catch (error) {
     // Return mock data as fallback
@@ -105,7 +105,7 @@ const getWeatherDetails = (forecast: WeatherForecast[] | null) => {
       { label: 'Precipitation', value: '0.2 mm', icon: Droplets },
     ]
   }
-  
+
   const current = forecast[0]
   return [
     { label: 'Cloud Cover', value: `${current.cloudCover?.toFixed(0) || 65}%`, icon: Cloud },
@@ -127,7 +127,7 @@ export default function Dashboard() {
 
   const getChartData = () => {
     if (!weatherForecast) return []
-    
+
     switch (selectedMetric) {
       case 'temperature':
         return weatherForecast.map(d => ({ hour: d.hour, value: d.temperature }))
@@ -151,18 +151,18 @@ export default function Dashboard() {
 
   // Calculate model accuracy based on CatBoost model structure
   const getModelAccuracy = () => {
-    if (!modelInfo) return '87.6%'
-    
+    if (!modelInfo?.performance?.test_mape && modelInfo?.performance?.test_mape !== 0) return '87.6%'
+
     // Use MAPE (Mean Absolute Percentage Error) for accuracy
-    const mape = modelInfo.performance.test_mape
+    const mape = Number(modelInfo.performance.test_mape)
     const accuracy = Math.max(0, 100 - mape)
     return `${accuracy.toFixed(1)}%`
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="flex-1 w-full">
       <NavigationHeader />
-      
+
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Quick Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -186,7 +186,7 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
-          
+
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Current Demand</CardTitle>
@@ -207,7 +207,7 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
-          
+
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Model Accuracy</CardTitle>
@@ -228,7 +228,7 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
-          
+
           <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Next 24h Prediction</CardTitle>
@@ -245,8 +245,8 @@ export default function Dashboard() {
                     {predictions?.[24]?.demand?.toFixed(1) || '3.2'} kW
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    ±{predictions?.[24]?.confidence ? 
-                      ((predictions[24].confidence[1] - predictions[24].confidence[0]) / 2).toFixed(1) : 
+                    ±{predictions?.[24]?.confidence ?
+                      ((predictions[24].confidence[1] - predictions[24].confidence[0]) / 2).toFixed(1) :
                       '0.4'} kW confidence
                   </p>
                 </>
@@ -260,7 +260,7 @@ export default function Dashboard() {
           <div className="lg:col-span-1 space-y-6">
             {/* Weather Status Card */}
             <WeatherStatus />
-            
+
             {/* Weather Details */}
             <Card className="max-h-[400px]">
               <CardHeader>
@@ -300,7 +300,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </div>
-          
+
           {/* Right Column: Weather Forecast - takes remaining space */}
           <div className="lg:col-span-2">
             <Card>
@@ -332,7 +332,7 @@ export default function Dashboard() {
                   <div className="h-[300px] lg:h-[400px] flex items-center justify-center">
                     <div className="text-center">
                       <p className="text-red-600 mb-4">Failed to load weather chart</p>
-                      <button 
+                      <button
                         onClick={refetchWeather}
                         className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                       >
@@ -343,31 +343,33 @@ export default function Dashboard() {
                 ) : (
                   <div className="h-[300px] lg:h-[400px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={chartData}>
+                      <LineChart data={chartData} margin={{ top: 5, right: 30, left: 60, bottom: 40 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis 
-                          dataKey="hour" 
+                        <XAxis
+                          dataKey="hour"
                           label={{ value: 'Hours', position: 'insideBottom', offset: -10 }}
                           tick={{ fontSize: 12 }}
                           tickFormatter={(value) => `${value}h`}
                         />
-                        <YAxis 
-                          label={{ 
-                            value: selectedMetric === 'all' ? 'Humidity (%) / Wind Speed (m/s)' : 
-                                   selectedMetric === 'temperature' ? 'Temperature (°C)' :
-                                   selectedMetric === 'humidity' ? 'Humidity (%)' :
-                                   selectedMetric === 'windSpeed' ? 'Wind Speed (m/s)' : 'Value', 
-                            angle: -90, 
+                        <YAxis
+                          label={{
+                            value: selectedMetric === 'all' ? 'Humidity (%) / Wind Speed (m/s)' :
+                              selectedMetric === 'temperature' ? 'Temperature (°C)' :
+                                selectedMetric === 'humidity' ? 'Humidity (%)' :
+                                  selectedMetric === 'windSpeed' ? 'Wind Speed (m/s)' : 'Value',
+                            angle: -90,
                             position: 'insideLeft',
                             style: { textAnchor: 'middle' }
                           }}
                           tick={{ fontSize: 12 }}
                           domain={selectedMetric === 'all' ? [0, 40] : undefined}
                         />
-                        <Tooltip 
-                          formatter={(value: any, name: string) => {
+                        <Tooltip
+                          formatter={(value: number | string, name: string) => {
+                            if (name === 'demand' || name === 'prediction') return [`${Number(value).toFixed(1)} kW`, 'Heat Demand']
+                            if (name === 'temperature') return [`${Number(value).toFixed(1)} °C`, 'Temperature']
                             if (selectedMetric === 'all') {
-                              if (name === 'Temperature') return [`${value}°C`, 'Temperature']
+                              if (name === 'Temperature') return [`${Number(value).toFixed(1)}°C`, 'Temperature']
                               if (name === 'Humidity') return [`${(Number(value) * 5).toFixed(1)}%`, 'Humidity']
                               if (name === 'Wind Speed') return [`${(Number(value) / 2).toFixed(1)} m/s`, 'Wind Speed']
                             }
@@ -376,43 +378,43 @@ export default function Dashboard() {
                             if (selectedMetric === 'windSpeed') return [`${value} m/s`, 'Wind Speed']
                             return [value, name]
                           }}
-                          labelFormatter={(label: any) => `Hour ${label}`}
+                          labelFormatter={(label: number | string) => `Hour ${label}`}
                         />
                         <Legend />
                         {selectedMetric === 'all' ? (
                           <>
-                            <Line 
-                              type="monotone" 
-                              dataKey="temperature" 
-                              stroke="#ef4444" 
+                            <Line
+                              type="monotone"
+                              dataKey="temperature"
+                              stroke="#ef4444"
                               strokeWidth={2}
-                              name="Temperature" 
+                              name="Temperature"
                               dot={{ fill: '#ef4444', strokeWidth: 2, r: 4 }}
                             />
-                            <Line 
-                              type="monotone" 
-                              dataKey="humidity" 
-                              stroke="#3b82f6" 
+                            <Line
+                              type="monotone"
+                              dataKey="humidity"
+                              stroke="#3b82f6"
                               strokeWidth={2}
-                              name="Humidity (÷5)" 
+                              name="Humidity (÷5)"
                               dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
                             />
-                            <Line 
-                              type="monotone" 
-                              dataKey="windSpeed" 
-                              stroke="#10b981" 
+                            <Line
+                              type="monotone"
+                              dataKey="windSpeed"
+                              stroke="#10b981"
                               strokeWidth={2}
-                              name="Wind Speed (×2)" 
+                              name="Wind Speed (×2)"
                               dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
                             />
                           </>
                         ) : (
-                          <Line 
-                            type="monotone" 
-                            dataKey="value" 
-                            stroke="#ef4444" 
+                          <Line
+                            type="monotone"
+                            dataKey="value"
+                            stroke="#ef4444"
                             strokeWidth={2}
-                            name={selectedMetric} 
+                            name={selectedMetric}
                             dot={{ fill: '#ef4444', strokeWidth: 2, r: 4 }}
                           />
                         )}
@@ -438,7 +440,7 @@ export default function Dashboard() {
                   <TabsTrigger value="timeline">Timeline View</TabsTrigger>
                   <TabsTrigger value="chart">Progressive Chart</TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="timeline" className="space-y-4">
                   {predictionsLoading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
@@ -460,7 +462,7 @@ export default function Dashboard() {
                   ) : predictionsError ? (
                     <div className="text-center py-8">
                       <p className="text-red-600">Failed to load predictions</p>
-                      <button 
+                      <button
                         onClick={refetchPredictions}
                         className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                       >
@@ -495,7 +497,7 @@ export default function Dashboard() {
                     </div>
                   )}
                 </TabsContent>
-                
+
                 <TabsContent value="chart">
                   {predictionsLoading ? (
                     <div className="h-[300px] lg:h-[400px] flex items-center justify-center">
@@ -505,7 +507,7 @@ export default function Dashboard() {
                     <div className="h-[300px] lg:h-[400px] flex items-center justify-center">
                       <div className="text-center">
                         <p className="text-red-600 mb-4">Failed to load prediction chart</p>
-                        <button 
+                        <button
                           onClick={refetchPredictions}
                           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                         >
@@ -521,7 +523,7 @@ export default function Dashboard() {
                           demand: pred.demand,
                           lower: pred.confidence?.[0] || pred.demand * 0.9,
                           upper: pred.confidence?.[1] || pred.demand * 1.1
-                        }))}>
+                        }))} margin={{ top: 5, right: 30, left: 40, bottom: 40 }}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="hours" />
                           <YAxis />
