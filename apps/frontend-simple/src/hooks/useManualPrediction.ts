@@ -102,22 +102,29 @@ export function useManualPrediction() {
         setHourlyPredictions([])
 
         try {
-            const predictions: HourlyPrediction[] = []
+            const forecastSlice = Object.values(hourlyWeatherData).slice(0, predictionHorizon)
+            const currentWeather = forecastSlice[0]
+            const weatherForecast = forecastSlice.slice(1)
 
-            for (let hour = 1; hour <= predictionHorizon; hour++) {
-                const weatherDataValue = hourlyWeatherData[hour]
-                if (!weatherDataValue) {
-                    throw new Error(`Missing weather data for hour ${hour}`)
-                }
+            const { predictions: horizonResult } = await apiService.predictHorizon(
+                currentWeather,
+                weatherForecast,
+                predictionHorizon,
+                buildingData
+            )
 
-                const result = await apiService.predictSingle(weatherDataValue, buildingData)
-                predictions.push({
-                    hour,
-                    weather: weatherDataValue,
-                    prediction: result,
-                    timestamp: result.timestamp
-                })
-            }
+            const predictions: HourlyPrediction[] = horizonResult.map((p: any, i: number) => ({
+                hour: i + 1,
+                weather: forecastSlice[i],
+                prediction: {
+                    heat_demand_kw: p.demand,
+                    confidence_interval: p.confidence,
+                    accuracy_score: p.accuracy,
+                    timestamp: p.timestamp,
+                    model_version: p.model_version
+                } as any, // Cast to PredictionResult
+                timestamp: p.timestamp
+            }))
 
             setHourlyPredictions(predictions)
         } catch (error) {

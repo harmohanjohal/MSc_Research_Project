@@ -150,42 +150,47 @@ export default function PredictionsPage() {
     setError(null)
 
     try {
-      const results: PredictionResult[] = []
+      const forecastSlice = weatherData.slice(0, timeHorizon)
+      // Extract first hour as "current" and the rest as forecast for the API
+      const currentWeather = forecastSlice[0]
+      const weatherForecast = forecastSlice.slice(1)
 
-      for (let i = 0; i < timeHorizon; i++) {
-        const weather = weatherData[i]
-        const timestamp = new Date()
-        timestamp.setHours(timestamp.getHours() + i)
-
-        const weatherPayload: WeatherData = {
-          temperature: weather.temperature,
-          humidity: weather.humidity,
-          windSpeed: weather.windSpeed,
-          solarRadiation: weather.solarRadiation,
-          cloudCover: weather.cloudCover,
-          pressure: weather.pressure,
-          precipitation: weather.precipitation
-        }
-
-        const buildingPayload = {
-          floorArea: buildingSpecs.floorArea,
-          insulationLevel: buildingSpecs.insulationLevel,
-          buildingType: buildingSpecs.buildingType,
-          occupancy: buildingSpecs.occupancy
-        }
-
-        const prediction = await apiService.predictSingle(weatherPayload, buildingPayload, timestamp.toISOString())
-
-        results.push({
-          hour: i + 1,
-          heatDemand: prediction.heat_demand_kw,
-          temperature: weather.temperature,
-          humidity: weather.humidity,
-          windSpeed: weather.windSpeed,
-          solarRadiation: weather.solarRadiation,
-          timestamp: timestamp.toISOString()
-        })
+      const weatherPayload: WeatherData = {
+        temperature: currentWeather.temperature,
+        humidity: currentWeather.humidity,
+        windSpeed: currentWeather.windSpeed,
+        solarRadiation: currentWeather.solarRadiation,
+        cloudCover: currentWeather.cloudCover,
+        pressure: currentWeather.pressure,
+        precipitation: currentWeather.precipitation
       }
+
+      const buildingPayload = {
+        floorArea: buildingSpecs.floorArea,
+        insulationLevel: buildingSpecs.insulationLevel,
+        buildingType: buildingSpecs.buildingType,
+        occupancy: buildingSpecs.occupancy
+      }
+
+      const { predictions: horizonResult } = await apiService.predictHorizon(
+        weatherPayload,
+        weatherForecast,
+        timeHorizon as any,
+        buildingPayload
+      )
+
+      const results: PredictionResult[] = horizonResult.map((p: any, i: number) => {
+        const weather = forecastSlice[i] || forecastSlice[forecastSlice.length - 1]
+        return {
+          hour: i + 1,
+          heatDemand: p.demand,
+          temperature: weather.temperature,
+          humidity: weather.humidity,
+          windSpeed: weather.windSpeed,
+          solarRadiation: weather.solarRadiation,
+          timestamp: p.timestamp
+        }
+      })
 
       setPredictions(results)
 

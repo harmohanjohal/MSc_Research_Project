@@ -1,58 +1,17 @@
 import { useState, useEffect, useCallback } from 'react'
 import { apiService, type WeatherData, type BuildingData, type PredictionResult, type ModelInfo, type HealthStatus } from '@/lib/api'
+import { useData } from '@/providers/DataProvider'
 
 // Custom hook for API health check
 export function useApiHealth() {
-  const [health, setHealth] = useState<HealthStatus | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const checkHealth = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const healthData = await apiService.withRetry(() => apiService.checkHealth())
-      setHealth(healthData)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Health check failed')
-      setHealth(null)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    checkHealth()
-  }, []) // Remove checkHealth from dependencies
-
-  return { health, loading, error, refetch: checkHealth }
+  const { health, loading, error, refreshAll } = useData()
+  return { health, loading, error, refetch: refreshAll }
 }
 
 // Custom hook for model information
 export function useModelInfo() {
-  const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const fetchModelInfo = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const info = await apiService.withRetry(() => apiService.getModelInfo())
-      setModelInfo(info)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch model info')
-      setModelInfo(null)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchModelInfo()
-  }, []) // Remove fetchModelInfo from dependencies
-
-  return { modelInfo, loading, error, refetch: fetchModelInfo }
+  const { modelInfo, loading, error, refreshAll } = useData()
+  return { modelInfo, loading, error, refetch: refreshAll }
 }
 
 // Custom hook for single prediction
@@ -62,14 +21,14 @@ export function usePrediction() {
   const [error, setError] = useState<string | null>(null)
 
   const makePrediction = useCallback(async (
-    weatherData: WeatherData, 
+    weatherData: WeatherData,
     buildingData?: BuildingData,
     timestamp?: string
   ) => {
     try {
       setLoading(true)
       setError(null)
-      const result = await apiService.withRetry(() => 
+      const result = await apiService.withRetry(() =>
         apiService.predictSingle(weatherData, buildingData, timestamp)
       )
       setPrediction(result)
@@ -89,12 +48,12 @@ export function usePrediction() {
     setError(null)
   }, [])
 
-  return { 
-    prediction, 
-    loading, 
-    error, 
-    makePrediction, 
-    clearPrediction 
+  return {
+    prediction,
+    loading,
+    error,
+    makePrediction,
+    clearPrediction
   }
 }
 
@@ -113,7 +72,7 @@ export function useWeatherData() {
   const updateWeather = useCallback((updates: Partial<WeatherData>) => {
     setCurrentWeather(prev => {
       const newWeather = { ...prev, ...updates }
-      
+
       // Ensure no NaN values
       Object.keys(newWeather).forEach(key => {
         const value = newWeather[key as keyof WeatherData]
@@ -131,7 +90,7 @@ export function useWeatherData() {
           newWeather[key as keyof WeatherData] = defaults[key as keyof WeatherData]
         }
       })
-      
+
       return newWeather
     })
   }, [])
@@ -157,29 +116,8 @@ export function useWeatherData() {
 
 // Custom hook for API connection status
 export function useApiConnection() {
-  const [isConnected, setIsConnected] = useState(false)
-  const [lastCheck, setLastCheck] = useState<Date | null>(null)
-
-  const checkConnection = useCallback(async () => {
-    try {
-      await apiService.testConnection()
-      setIsConnected(true)
-      setLastCheck(new Date())
-    } catch (error) {
-      setIsConnected(false)
-      setLastCheck(new Date())
-    }
-  }, [])
-
-  useEffect(() => {
-    checkConnection()
-    
-    // Check connection every 30 seconds
-    const interval = setInterval(checkConnection, 30000)
-    return () => clearInterval(interval)
-  }, []) // Remove checkConnection from dependencies
-
-  return { isConnected, lastCheck, checkConnection }
+  const { isConnected, lastCheck, refreshAll } = useData()
+  return { isConnected, lastCheck, checkConnection: refreshAll }
 }
 
 // Custom hook for cached data
@@ -214,7 +152,7 @@ export function useCachedData<T>(
       setError(null)
       const result = await fetcher()
       setData(result)
-      
+
       // Cache the result
       try {
         localStorage.setItem(key, JSON.stringify({
@@ -224,7 +162,7 @@ export function useCachedData<T>(
       } catch (error) {
         console.warn('Failed to cache data:', error)
       }
-      
+
       return result
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch data'

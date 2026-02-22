@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: 'AI-powered heat demand prediction system for district heating',
 }
 
+import { DataProvider } from '@/providers/DataProvider'
+
 export default function RootLayout({
   children,
 }: {
@@ -20,7 +22,9 @@ export default function RootLayout({
         <div className="min-h-screen relative flex flex-col bg-background text-foreground grid-pattern antialiased selection:bg-primary/20 selection:text-primary">
           <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
           <div className="flex-1 relative z-10">
-            {children}
+            <DataProvider>
+              {children}
+            </DataProvider>
           </div>
         </div>
       </body>
