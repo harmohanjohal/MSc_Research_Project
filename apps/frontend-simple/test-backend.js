@@ -1,7 +1,8 @@
 // Simple test script to verify backend API is working
 // Run this with: node test-backend.js
 
-const API_BASE = 'http://localhost:5000'
+// Backend API URL - use env var if available, otherwise default to localhost
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 async function testBackend() {
   console.log('🧪 Testing Backend API...')

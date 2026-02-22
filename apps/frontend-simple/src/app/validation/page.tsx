@@ -64,11 +64,11 @@ export default function ValidationPage() {
       setModelInfo(modelData)
 
       // Use the real MAPE values from the API
-      const realMape = modelData.performance.test_mape_threshold || 
-                      modelData.performance.test_mape_non_zero || 
-                      modelData.performance.test_smape || 
-                      22.54 // Fallback to our analysis result
-      
+      const realMape = modelData.performance.test_mape_threshold ||
+        modelData.performance.test_mape_non_zero ||
+        modelData.performance.test_smape ||
+        22.54 // Fallback to our analysis result
+
       const metrics: ValidationMetrics = {
         overallAccuracy: Math.round((1 - realMape / 100) * 100 * 10) / 10,
         mape: realMape,
@@ -84,20 +84,20 @@ export default function ValidationPage() {
       // Generate historical comparison data (last 30 days)
       const historicalData: HistoricalComparison[] = []
       const currentDate = new Date()
-      
+
       for (let i = 29; i >= 0; i--) {
         const date = new Date(currentDate)
         date.setDate(date.getDate() - i)
-        
+
         // Generate realistic heat demand data with seasonal patterns
         const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24))
         const seasonalFactor = 1 + 0.5 * Math.sin((dayOfYear - 80) * 2 * Math.PI / 365) // Winter peak
         const baseDemand = 2.5 * seasonalFactor
-        
+
         const actual = baseDemand + (Math.random() - 0.5) * 0.8
         const predicted = actual + (Math.random() - 0.5) * (metrics.averageError * 2)
         const error = Math.abs(actual - predicted)
-        
+
         historicalData.push({
           day: 30 - i,
           actual,
@@ -156,7 +156,7 @@ export default function ValidationPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+      <div className="flex-1 w-full">
         <NavigationHeader title="Model Validation" showBackButton />
         <main className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
@@ -172,7 +172,7 @@ export default function ValidationPage() {
 
   if (error || !validationMetrics || !modelInfo) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+      <div className="flex-1 w-full">
         <NavigationHeader title="Model Validation" showBackButton />
         <main className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
@@ -180,7 +180,7 @@ export default function ValidationPage() {
               <AlertCircle className="h-12 w-12 mx-auto text-red-500 mb-4" />
               <p className="text-lg font-medium text-red-600">Failed to load validation data</p>
               <p className="text-sm text-gray-600 mt-2">{error}</p>
-              <button 
+              <button
                 onClick={loadValidationData}
                 className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
               >
@@ -194,9 +194,9 @@ export default function ValidationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+    <div className="flex-1 w-full">
       <NavigationHeader title="Model Validation" showBackButton />
-      
+
       <main className="container mx-auto px-4 py-8">
         {/* Overall Performance Summary */}
         <Card className="mb-8 bg-gradient-to-r from-green-500 to-emerald-600 text-white">
@@ -229,12 +229,12 @@ export default function ValidationPage() {
                 <div className="text-green-100">Test Cases</div>
               </div>
             </div>
-            
+
             {/* MAPE Explanation */}
             <div className="mt-4 p-3 bg-green-600 rounded-lg">
               <p className="text-sm text-green-100">
-                <strong>Note:</strong> Standard MAPE can be misleading due to 44.6% zero values in the dataset. 
-                                 We use robust MAPE (&gt;1 kW only) which shows {validationMetrics.mape.toFixed(1)}% error for meaningful predictions.
+                <strong>Note:</strong> Standard MAPE can be misleading due to 44.6% zero values in the dataset.
+                We use robust MAPE (&gt;1 kW only) which shows {validationMetrics.mape.toFixed(1)}% error for meaningful predictions.
               </p>
             </div>
           </CardContent>
@@ -252,7 +252,7 @@ export default function ValidationPage() {
                 <TabsTrigger value="chart">Performance Chart</TabsTrigger>
                 <TabsTrigger value="table">Detailed Table</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="chart">
                 <div className="h-[400px]">
                   <ResponsiveContainer width="100%" height="100%">
@@ -260,22 +260,22 @@ export default function ValidationPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="day" />
                       <YAxis />
-                      <Tooltip 
+                      <Tooltip
                         formatter={(value: number) => [`${value.toFixed(2)} kW`, 'Heat Demand']}
                         labelFormatter={(label) => `Day ${label}`}
                       />
-                      <Line 
-                        type="monotone" 
-                        dataKey="actual" 
-                        stroke="hsl(var(--chart-1))" 
-                        name="Actual Demand" 
+                      <Line
+                        type="monotone"
+                        dataKey="actual"
+                        stroke="hsl(var(--chart-1))"
+                        name="Actual Demand"
                         strokeWidth={2}
                       />
-                      <Line 
-                        type="monotone" 
-                        dataKey="predicted" 
-                        stroke="hsl(var(--chart-2))" 
-                        name="Predicted Demand" 
+                      <Line
+                        type="monotone"
+                        dataKey="predicted"
+                        stroke="hsl(var(--chart-2))"
+                        name="Predicted Demand"
                         strokeWidth={2}
                         strokeDasharray="5 5"
                       />
@@ -283,7 +283,7 @@ export default function ValidationPage() {
                   </ResponsiveContainer>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="table">
                 <div className="max-h-[400px] overflow-y-auto">
                   <table className="w-full text-sm">
@@ -337,7 +337,7 @@ export default function ValidationPage() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              
+
               <div className="space-y-3">
                 {accuracyByHorizon.map((item, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -373,14 +373,14 @@ export default function ValidationPage() {
                     <div className="text-sm text-blue-800">RMSE</div>
                     <div className="text-xs text-muted-foreground">Root Mean Square Error</div>
                   </div>
-                  
+
                   <div className="text-center p-4 bg-green-50 rounded-lg">
                     <div className="text-2xl font-bold text-green-600">{validationMetrics.mae.toFixed(3)}</div>
                     <div className="text-sm text-green-800">MAE</div>
                     <div className="text-xs text-muted-foreground">Mean Absolute Error</div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-semibold mb-3">Error Analysis</h4>
                   <div className="space-y-2">
@@ -402,7 +402,7 @@ export default function ValidationPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-semibold mb-3">Model Information</h4>
                   <div className="space-y-2">
@@ -426,7 +426,7 @@ export default function ValidationPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-semibold mb-3">MAPE Analysis</h4>
                   <div className="space-y-2">
@@ -442,12 +442,12 @@ export default function ValidationPage() {
                         {modelInfo.performance?.test_mape_non_zero?.toFixed(1) || 'N/A'}%
                       </span>
                     </div>
-                                         <div className="flex justify-between">
-                       <span className="text-sm">MAPE (&gt;1 kW):</span>
-                       <span className="font-medium text-green-600">
-                         {modelInfo.performance?.test_mape_threshold?.toFixed(1) || 'N/A'}%
-                       </span>
-                     </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">MAPE (&gt;1 kW):</span>
+                      <span className="font-medium text-green-600">
+                        {modelInfo.performance?.test_mape_threshold?.toFixed(1) || 'N/A'}%
+                      </span>
+                    </div>
                     <div className="flex justify-between">
                       <span className="text-sm">Symmetric MAPE:</span>
                       <span className="font-medium text-blue-600">
@@ -456,7 +456,7 @@ export default function ValidationPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-semibold mb-3">Performance Insights</h4>
                   <div className="space-y-2">
@@ -498,8 +498,8 @@ export default function ValidationPage() {
                     <p className="text-sm text-muted-foreground">{indicator.description}</p>
                     <div className="mt-3">
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-green-600 h-2 rounded-full transition-all duration-300" 
+                        <div
+                          className="bg-green-600 h-2 rounded-full transition-all duration-300"
                           style={{ width: `${indicator.score}%` }}
                         ></div>
                       </div>

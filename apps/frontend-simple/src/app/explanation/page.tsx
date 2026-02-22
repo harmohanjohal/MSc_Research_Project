@@ -5,60 +5,77 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { LoadingSpinner, ErrorDisplay } from '@/components/ui/error-boundary'
 import { useModelInfo } from '@/hooks/useApi'
+import { ModelInfo } from '@/lib/api'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter } from 'recharts'
 import { Brain, Database, TrendingUp, Target, Lightbulb, Activity } from 'lucide-react'
 
-// Helper function to convert model feature importance to chart data
-const getFeatureImportanceData = (modelInfo: any) => {
-  if (!modelInfo?.top_features) {
+interface FeatureImportance {
+  feature: string;
+  importance: number;
+}
+
+// Helper to format feature names for display
+const formatFeatureName = (name: string) => {
+  return name.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+};
+
+// Helper to convert model info into chart data
+const getFeatureImportanceData = (modelInfo: ModelInfo | null) => {
+  if (!modelInfo || !modelInfo.top_features) {
+    // Fallback/mock data if modelInfo or top_features is missing
     return [
-      { feature: "Temperature", importance: 0.28, correlation: -0.76 },
-      { feature: "Heating Degree Hours", importance: 0.25, correlation: 0.89 },
-      { feature: "Floor Area", importance: 0.15, correlation: 0.68 },
-      { feature: "Humidity", importance: 0.12, correlation: -0.72 },
-      { feature: "Wind Speed", importance: 0.08, correlation: 0.45 },
-      { feature: "Hour of Day", importance: 0.06, correlation: 0.38 },
-      { feature: "Day of Week", importance: 0.04, correlation: 0.52 },
-      { feature: "Building Type", importance: 0.02, correlation: 0.31 }
-    ]
+      { name: "Temperature", correlation: -0.76, original: "temperature" },
+      { name: "Heating Degree Hours", correlation: 0.89, original: "heating_degree_hours" },
+      { name: "Floor Area", correlation: 0.68, original: "floor_area" },
+      { name: "Humidity", correlation: -0.72, original: "humidity" },
+      { name: "Wind Speed", correlation: 0.45, original: "wind_speed" },
+      { name: "Hour of Day", correlation: 0.38, original: "hour_of_day" },
+      { name: "Day of Week", correlation: 0.52, original: "day_of_week" },
+      { name: "Building Type", correlation: 0.31, original: "building_type" }
+    ];
   }
 
   // Convert feature importance to chart data
   return modelInfo.top_features
-    .slice(0, 8)
-    .map((feature: any) => ({
-      feature: feature.feature.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+    .sort((a, b) => b.importance - a.importance)
+    .slice(0, 8) // Limit to top 8 features for display
+    .map((feature) => ({
+      name: formatFeatureName(feature.feature),
+      // For demonstration, use importance as a proxy for correlation magnitude
+      // In a real scenario, you'd have actual correlation values
+      correlation: feature.importance * (Math.random() > 0.5 ? 1 : -1), // Mock positive/negative correlation
       importance: feature.importance,
-      correlation: Math.random() * 0.8 + 0.2 // Mock correlation for now
-    }))
-}
+      original: feature.feature
+    }));
+};
 
 export default function ExplanationPage() {
   const { modelInfo, loading, error } = useModelInfo()
   const featureImportance = getFeatureImportanceData(modelInfo)
-  
-  const correlationData = featureImportance.map((item: any) => ({
-    feature: item.feature.split(' ')[0], // Shortened for chart
-    importance: item.importance * 100,
-    correlation: Math.abs(item.correlation) * 100
+
+  const correlationData = featureImportance.map((item) => ({
+    name: item.name,
+    value: parseFloat(Math.abs(item.correlation).toFixed(2)),
+    isPositive: item.correlation > 0,
+    fullData: item
   }))
 
   const modelPerformance = modelInfo ? {
-    r2: modelInfo.performance.test_r2,
-    rmse: 5.314,
-    mae: 4.168,
-    mape: modelInfo.performance.test_mape,
-    totalFeatures: modelInfo.total_features,
+    r2: modelInfo.performance?.test_r2 ?? 0.85,
+    rmse: modelInfo.performance?.test_rmse ?? 5.314, // Using potential rmse from api if it was passed
+    mae: modelInfo.performance?.test_mae ?? 4.168, // Using potential mae from api if it was passed
+    mape: modelInfo.performance?.test_mape ?? 12.3,
+    totalFeatures: modelInfo.total_features ?? 0,
     modelType: modelInfo.model_type,
-    totalPredictions: 10000,
-    correctPredictions: 8767
+    totalPredictions: 10000, // Mocked
+    correctPredictions: 8767 // Mocked
   } : {
     r2: 0.8767,
     rmse: 5.314,
     mae: 4.168,
-    mape: 12.3,
-    totalFeatures: 44,
-    modelType: 'CatBoost',
+    mape: 12.35,
+    totalFeatures: 42,
+    modelType: 'CatBoost Regressor',
     totalPredictions: 10000,
     correctPredictions: 8767
   }
@@ -71,11 +88,11 @@ export default function ExplanationPage() {
     { horizon: '36h', confidence: 85.3, uncertainty: 14.7 },
     { horizon: '48h', confidence: 82.1, uncertainty: 17.9 }
   ]
-  
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100">
+    <div className="flex-1 w-full">
       <NavigationHeader title="How It Works" showBackButton />
-      
+
       <main className="container mx-auto px-4 py-8">
         {/* Overview Card */}
         <Card className="mb-8 bg-gradient-to-r from-green-500 to-blue-600 text-white">
@@ -140,7 +157,7 @@ export default function ExplanationPage() {
                 <TabsTrigger value="performance">Performance</TabsTrigger>
                 <TabsTrigger value="confidence">Confidence</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="features" className="space-y-6">
                 {loading ? (
                   <div className="h-[400px] flex items-center justify-center">
@@ -150,7 +167,7 @@ export default function ExplanationPage() {
                   <div className="h-[400px] flex items-center justify-center">
                     <div className="text-center">
                       <p className="text-red-600 mb-4">Failed to load feature importance</p>
-                      <button 
+                      <button
                         onClick={() => window.location.reload()}
                         className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                       >
@@ -164,10 +181,10 @@ export default function ExplanationPage() {
                       <h3 className="text-lg font-semibold mb-4">Feature Importance</h3>
                       <div className="h-[400px]">
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={featureImportance} layout="horizontal">
+                          <BarChart data={featureImportance} layout="horizontal" margin={{ top: 5, right: 30, left: 120, bottom: 40 }}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis type="number" />
-                            <YAxis dataKey="feature" type="category" width={150} />
+                            <XAxis type="number" dataKey="importance" />
+                            <YAxis dataKey="name" type="category" width={150} />
                             <Tooltip />
                             <Bar dataKey="importance" fill="hsl(var(--chart-1))" />
                           </BarChart>
@@ -176,7 +193,7 @@ export default function ExplanationPage() {
                     </div>
                   </>
                 )}
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <h4 className="font-semibold mb-3">Current Input Values</h4>
@@ -203,7 +220,7 @@ export default function ExplanationPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <h4 className="font-semibold mb-3">Key Insights</h4>
                     <div className="space-y-3">
@@ -223,30 +240,30 @@ export default function ExplanationPage() {
                   </div>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="correlations" className="space-y-6">
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Feature Correlations with Heat Demand</h3>
                   <div className="h-[400px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <ScatterChart data={correlationData}>
+                      <ScatterChart data={correlationData} margin={{ top: 5, right: 30, left: 60, bottom: 40 }}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="importance" name="Importance %" />
-                        <YAxis dataKey="correlation" name="Correlation %" />
+                        <XAxis dataKey="value" name="Absolute Correlation" />
+                        <YAxis dataKey="importance" name="Importance" />
                         <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                        <Scatter dataKey="correlation" fill="hsl(var(--chart-2))" />
+                        <Scatter dataKey="value" fill="hsl(var(--chart-2))" />
                       </ScatterChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <h4 className="font-semibold mb-3">Strong Correlations</h4>
-                    <div className="space-y-2">
-                      {featureImportance.filter((f: any) => Math.abs(f.correlation) > 0.7).map((feature: any, index) => (
-                        <div key={index} className="flex justify-between items-center">
-                          <span className="text-sm">{feature.feature}</span>
+                    <div className="space-y-3">
+                      {featureImportance.filter((f) => Math.abs(f.correlation) > 0.7).map((feature, index) => (
+                        <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                          <span className="text-sm">{feature.name}</span>
                           <span className={`font-medium ${feature.correlation > 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {feature.correlation > 0 ? '+' : ''}{feature.correlation.toFixed(2)}
                           </span>
@@ -254,7 +271,7 @@ export default function ExplanationPage() {
                       ))}
                     </div>
                   </div>
-                  
+
                   <div>
                     <h4 className="font-semibold mb-3">Correlation Insights</h4>
                     <div className="space-y-3">
@@ -271,7 +288,7 @@ export default function ExplanationPage() {
                   </div>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="performance" className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <Card>
@@ -283,7 +300,7 @@ export default function ExplanationPage() {
                       <p className="text-xs text-muted-foreground">Variance explained</p>
                     </CardContent>
                   </Card>
-                  
+
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm">RMSE</CardTitle>
@@ -293,7 +310,7 @@ export default function ExplanationPage() {
                       <p className="text-xs text-muted-foreground">Root mean square error</p>
                     </CardContent>
                   </Card>
-                  
+
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm">MAE</CardTitle>
@@ -303,7 +320,7 @@ export default function ExplanationPage() {
                       <p className="text-xs text-muted-foreground">Mean absolute error</p>
                     </CardContent>
                   </Card>
-                  
+
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm">MAPE</CardTitle>
@@ -314,7 +331,7 @@ export default function ExplanationPage() {
                     </CardContent>
                   </Card>
                 </div>
-                
+
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Model Performance Details</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -333,7 +350,7 @@ export default function ExplanationPage() {
                           <div className="flex justify-between">
                             <span className="text-sm">Overall Accuracy:</span>
                             <span className="font-medium text-green-600">
-                              {modelPerformance.totalPredictions > 0 
+                              {modelPerformance.totalPredictions > 0
                                 ? ((modelPerformance.correctPredictions / modelPerformance.totalPredictions) * 100).toFixed(1)
                                 : '0.0'
                               }%
@@ -342,7 +359,7 @@ export default function ExplanationPage() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-4">
                       <div>
                         <h4 className="font-semibold mb-2">Performance Insights</h4>
@@ -362,7 +379,7 @@ export default function ExplanationPage() {
                   </div>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="confidence" className="space-y-6">
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Confidence by Time Horizon</h3>
@@ -379,7 +396,7 @@ export default function ExplanationPage() {
                     </ResponsiveContainer>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <h4 className="font-semibold mb-3">Uncertainty Sources</h4>
@@ -402,19 +419,17 @@ export default function ExplanationPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <h4 className="font-semibold mb-3">Confidence Intervals</h4>
-                    <div className="space-y-3">
-                      {confidenceByHorizon.map((item: any, index) => (
-                        <div key={index} className="p-3 border rounded-lg">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="font-medium">{item.horizon}</span>
-                            <span className="text-green-600 font-medium">{item.confidence}%</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="bg-green-600 h-2 rounded-full" 
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+                      {confidenceByHorizon.map((item, index) => (
+                        <div key={index} className="bg-white p-3 py-4 rounded-xl border shadow-sm text-center">
+                          <span className="text-sm text-gray-500">{item.horizon}</span>
+                          <div className="text-xl font-bold text-green-600 mt-1">{item.confidence}%</div>
+                          <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                            <div
+                              className="bg-green-600 h-2 rounded-full"
                               style={{ width: `${item.confidence}%` }}
                             ></div>
                           </div>

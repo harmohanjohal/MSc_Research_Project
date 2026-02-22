@@ -18,13 +18,16 @@ import logging
 import traceback
 import os
 from feature_service import FeatureService
+from constants import SAMPLE_WEATHER_DATA, SAMPLE_BUILDING_DATA, TEST_WEATHER_DATA
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for frontend communication
+# Enable CORS for frontend communication, with configurable origin
+frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+CORS(app, resources={r"/api/*": {"origins": frontend_url}})
 
 # Global variables for model and services
 model = None
@@ -32,8 +35,13 @@ scaler = None
 feature_service = None
 model_info = None
 
-def load_model_and_services():
-    """Load the trained model, scaler, and initialize services"""
+def load_model_and_services() -> bool:
+    """
+    Load the trained machine learning model, the feature scaler, and initialize required services.
+    
+    Returns:
+        bool: True if the model and feature services loaded successfully, False otherwise.
+    """
     global model, scaler, feature_service, model_info
     
     try:
@@ -71,7 +79,12 @@ def load_model_and_services():
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    """Health check endpoint"""
+    """
+    Health check endpoint to verify API and model status.
+    
+    Returns:
+        tuple: JSON response indicating health status (including boolean flags for model/scaler) and an HTTP status code.
+    """
     try:
         status = {
             'status': 'healthy',
@@ -91,15 +104,21 @@ def health_check():
         return jsonify(status)
     
     except Exception as e:
+        logger.error(f"Health check error: {e}")
         return jsonify({
             'status': 'error',
-            'error': str(e),
+            'error': 'Internal server error during health check',
             'timestamp': datetime.now().isoformat()
         }), 500
 
 @app.route('/api/model-info', methods=['GET'])
 def get_model_info():
-    """Get detailed model information"""
+    """
+    Get detailed information regarding the currently loaded CatBoost model.
+    
+    Returns:
+        tuple: JSON dictionary containing model versions, hyperparameter defaults, and top feature importance, with HTTP status.
+    """
     try:
         if not model_info:
             return jsonify({'error': 'Model not loaded'}), 500
@@ -146,11 +165,18 @@ def get_model_info():
     
     except Exception as e:
         logger.error(f"Error getting model info: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Internal server error while fetching model info'}), 500
 
 @app.route('/api/predict', methods=['POST'])
 def predict_single():
-    """Make a single heat demand prediction"""
+    """
+    Make a single heat demand prediction using provided weather and building conditions.
+    
+    Expects JSON payload with 'weatherData' and optionally 'buildingData' and 'timestamp'.
+    
+    Returns:
+        tuple: JSON response containing the 'heat_demand_kw' prediction and HTTP status.
+    """
     try:
         data = request.json
         
@@ -210,12 +236,19 @@ def predict_single():
     
     except Exception as e:
         logger.error(f"Error making prediction: {e}")
-        traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Internal server error during prediction sequence'}), 500
 
 @app.route('/api/predict-horizon', methods=['POST'])
 def predict_horizon():
-    """Make predictions for 24 or 48 hour horizon"""
+    """
+    Make predictions for a multi-hour horizon (typically 24 or 48 hours).
+    
+    Expects a JSON payload containing 'weatherData' (current), 'weatherForecast' (array of future conditions),
+    and optionally 'buildingData' and 'horizon' (int).
+    
+    Returns:
+        tuple: JSON array of predictions across the horizon matching timestamps, and HTTP status.
+    """
     try:
         data = request.json
         
@@ -301,12 +334,16 @@ def predict_horizon():
     
     except Exception as e:
         logger.error(f"Error making horizon prediction: {e}")
-        traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Internal server error during horizon prediction'}), 500
 
 @app.route('/api/features', methods=['GET'])
 def get_features():
-    """Get required features for the model"""
+    """
+    Get the required feature column names expected by the loaded model.
+    
+    Returns:
+        tuple: JSON list of string feature names required for prediction.
+    """
     try:
         if not model_info:
             return jsonify({'error': 'Model not loaded'}), 500
@@ -318,40 +355,25 @@ def get_features():
     
     except Exception as e:
         logger.error(f"Error getting features: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Internal server error while fetching feature list'}), 500
 
 @app.route('/api/sample', methods=['GET'])
 def get_sample_data():
-    """Get sample data for testing"""
+    """
+    Generate sample engineered features from testing constants.
+    
+    Returns:
+        tuple: JSON representation of a fully-engineered Pandas dataframe row for frontend testing.
+    """
     try:
         if not feature_service:
             return jsonify({'error': 'Feature service not loaded'}), 500
         
-        # Create sample weather data
-        sample_weather = {
-            'temperature': 15.0,
-            'windSpeed': 8.0,
-            'humidity': 65.0,
-            'solarRadiation': 450.0,
-            'cloudCover': 55.0,
-            'pressure': 101325.0,
-            'precipitation': 0.0
-        }
-        
-        # Create sample building data
-        sample_building = {
-            'floorArea': 100.0,
-            'numFloors': 2,
-            'infiltrationRate': 0.5,
-            'buildingType': 'detached',
-            'constructionType': 'standard'
-        }
-        
-        # Generate sample features
+        # Generate sample features using constants
         features = feature_service.create_single_prediction_features(
-            sample_weather, 
+            SAMPLE_WEATHER_DATA, 
             datetime.now(), 
-            sample_building
+            SAMPLE_BUILDING_DATA
         )
         
         # Convert features to the format expected by frontend
@@ -366,32 +388,26 @@ def get_sample_data():
     
     except Exception as e:
         logger.error(f"Error getting sample data: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Internal server error generating sample data'}), 500
 
 @app.route('/api/test', methods=['GET'])
 def test_endpoint():
-    """Test endpoint with sample prediction"""
+    """
+    Run an end-to-end integration test of the prediction pipeline using hardcoded test constants.
+    
+    Returns:
+        tuple: JSON object confirming test success and the exact prediction outcome.
+    """
     try:
-        # Sample weather data
-        sample_weather = {
-            'temperature': 10,
-            'windSpeed': 15,
-            'humidity': 70,
-            'solarRadiation': 300,
-            'cloudCover': 60,
-            'pressure': 101325,
-            'precipitation': 0
-        }
-        
-        # Make test prediction
-        features = feature_service.create_single_prediction_features(sample_weather)
+        # Make test prediction using constants
+        features = feature_service.create_single_prediction_features(TEST_WEATHER_DATA)
         features = feature_service.validate_features(features, model_info['feature_names'])
         features_scaled = scaler.transform(features)
         prediction = model.predict(features_scaled)[0]
         
         return jsonify({
             'test_successful': True,
-            'sample_weather': sample_weather,
+            'sample_weather': TEST_WEATHER_DATA,
             'prediction': float(prediction),
             'features_created': features.to_dict('records')[0],
             'model_ready': True
@@ -401,7 +417,7 @@ def test_endpoint():
         logger.error(f"Test failed: {e}")
         return jsonify({
             'test_successful': False,
-            'error': str(e)
+            'error': 'Internal server error during test run'
         }), 500
 
 @app.errorhandler(404)
@@ -430,7 +446,9 @@ if __name__ == '__main__':
         print("  POST /api/predict-horizon - Multi-hour prediction")
         print("\nStarting server on http://localhost:5000")
         
-        app.run(host='0.0.0.0', port=5000, debug=True)
+        # Determine debug mode from environment variable
+        is_debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+        app.run(host='0.0.0.0', port=5000, debug=is_debug)
     else:
         print("ERROR: Failed to load model. Please ensure model files are present")
         print("   Required files:")

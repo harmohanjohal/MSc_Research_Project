@@ -78,10 +78,10 @@ export default function PlantControlPage() {
   // API data hooks
   const { data: realPlantStatus, loading: statusLoading, error: statusError } = useCachedData('plant-status', plantStatusFetcher, 30 * 1000)
   const { data: productionData, loading: productionLoading, error: productionError } = useCachedData('production-data', productionDataFetcher, 60 * 1000)
-  
+
   // Use real data if available, fallback to mock data
   const currentPlantStatus = realPlantStatus || plantStatus
-  
+
   const [isRunning, setIsRunning] = useState(currentPlantStatus.isRunning)
   const [autoMode, setAutoMode] = useState(true)
   const [temperature, setTemperature] = useState(currentPlantStatus.temperature)
@@ -89,9 +89,9 @@ export default function PlantControlPage() {
   const [demandResponse, setDemandResponse] = useState(false)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-100">
+    <div className="flex-1 w-full">
       <NavigationHeader title="Plant Control" showBackButton />
-      
+
       <main className="container mx-auto px-4 py-8">
         {/* Plant Status Overview */}
         <Card className="mb-8 bg-gradient-to-r from-orange-500 to-red-600 text-white">
@@ -117,7 +117,7 @@ export default function PlantControlPage() {
                 <div className="text-lg font-bold">{isRunning ? 'RUNNING' : 'STOPPED'}</div>
                 <div className="text-orange-100 text-sm">Plant Status</div>
               </div>
-              
+
               <div className="text-center">
                 {statusLoading ? (
                   <LoadingSpinner size="sm" />
@@ -129,7 +129,7 @@ export default function PlantControlPage() {
                   </>
                 )}
               </div>
-              
+
               <div className="text-center">
                 {statusLoading ? (
                   <LoadingSpinner size="sm" />
@@ -141,7 +141,7 @@ export default function PlantControlPage() {
                   </>
                 )}
               </div>
-              
+
               <div className="text-center">
                 {statusLoading ? (
                   <LoadingSpinner size="sm" />
@@ -182,7 +182,7 @@ export default function PlantControlPage() {
                     {isRunning ? <Square className="h-6 w-6 mb-1" /> : <Play className="h-6 w-6 mb-1" />}
                     {isRunning ? 'Stop' : 'Start'}
                   </Button>
-                  
+
                   <Button
                     variant={autoMode ? "default" : "outline"}
                     size="lg"
@@ -192,7 +192,7 @@ export default function PlantControlPage() {
                     <Settings className="h-6 w-6 mb-1" />
                     Auto Mode
                   </Button>
-                  
+
                   <Button
                     variant={demandResponse ? "default" : "outline"}
                     size="lg"
@@ -202,7 +202,7 @@ export default function PlantControlPage() {
                     <Zap className="h-6 w-6 mb-1" />
                     Demand Response
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     size="lg"
@@ -240,7 +240,7 @@ export default function PlantControlPage() {
                       disabled={autoMode}
                     />
                   </div>
-                  
+
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-sm font-medium flex items-center">
@@ -260,7 +260,7 @@ export default function PlantControlPage() {
                       disabled={autoMode}
                     />
                   </div>
-                  
+
                   {autoMode && (
                     <div className="p-3 bg-blue-50 rounded-lg">
                       <p className="text-sm text-blue-800">
@@ -285,13 +285,13 @@ export default function PlantControlPage() {
                     <div className="text-2xl font-bold text-yellow-800">{plantStatus.fuelConsumption}</div>
                     <div className="text-sm text-yellow-700">kg/h Fuel Rate</div>
                   </div>
-                  
+
                   <div className="text-center p-4 bg-green-50 rounded-lg">
                     <TrendingUp className="h-8 w-8 text-green-600 mx-auto mb-2" />
                     <div className="text-2xl font-bold text-green-800">{plantStatus.efficiency}%</div>
                     <div className="text-sm text-green-700">Efficiency</div>
                   </div>
-                  
+
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
                     <Gauge className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                     <div className="text-2xl font-bold text-blue-800">{plantStatus.fuelLevel}%</div>
@@ -322,7 +322,7 @@ export default function PlantControlPage() {
                       </div>
                       <div className="text-xs text-red-700 mt-1">Real-time from district network</div>
                     </div>
-                    
+
                     <div className="p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
                       <div className="flex items-center justify-between">
                         <div>
@@ -334,7 +334,7 @@ export default function PlantControlPage() {
                       <div className="text-xs text-orange-700 mt-1">AI forecast for next hour</div>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-4">
                     <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
                       <div className="flex items-center justify-between">
@@ -346,7 +346,7 @@ export default function PlantControlPage() {
                       </div>
                       <div className="text-xs text-blue-700 mt-1">Highest demand recorded today</div>
                     </div>
-                    
+
                     <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
                       <div className="flex items-center justify-between">
                         <div>
@@ -359,7 +359,7 @@ export default function PlantControlPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">Demand Response Status</span>
@@ -368,7 +368,7 @@ export default function PlantControlPage() {
                     </span>
                   </div>
                   <div className="text-xs text-gray-600">
-                    {demandResponse 
+                    {demandResponse
                       ? 'System is responding to grid demand signals and adjusting output accordingly'
                       : 'System operating at normal capacity based on local demand only'
                     }
@@ -399,7 +399,7 @@ export default function PlantControlPage() {
                       Adjusting output based on 6-hour demand forecast
                     </p>
                   </div>
-                  
+
                   <div className="p-3 bg-blue-50 rounded-lg">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm font-medium">Efficiency Optimization</span>
@@ -409,7 +409,7 @@ export default function PlantControlPage() {
                       Fine-tuning combustion parameters for optimal efficiency
                     </p>
                   </div>
-                  
+
                   <div className="p-3 bg-yellow-50 rounded-lg">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm font-medium">Load Balancing</span>
@@ -462,12 +462,12 @@ export default function PlantControlPage() {
                     <AlertTriangle className="h-4 w-4 mr-2" />
                     Emergency Stop
                   </Button>
-                  
+
                   <Button variant="outline" className="w-full">
                     <Wrench className="h-4 w-4 mr-2" />
                     Schedule Maintenance
                   </Button>
-                  
+
                   <Button variant="outline" className="w-full">
                     <Settings className="h-4 w-4 mr-2" />
                     System Diagnostics

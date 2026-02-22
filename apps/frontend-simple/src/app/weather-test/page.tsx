@@ -12,8 +12,13 @@ export default function WeatherTestPage() {
       try {
         setStatus('Testing weather API...')
         
-        // Direct API call with hardcoded key
-        const apiKey = '2e9833d1fe914f058af235413251108'
+        // Use environment variable for the API key instead of hardcoding
+        const apiKey = process.env.NEXT_PUBLIC_WEATHER_API_KEY
+        if (!apiKey) {
+            setError('API key is not configured')
+            setStatus('Failed')
+            return
+        }
         const url = `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=London&aqi=no`
         
         const response = await fetch(url)
