@@ -1,90 +1,97 @@
-# Forecast Driven District Heating Control 
+# Forecast Driven District Heating Control
 
-![Version](https://img.shields.io/badge/version-1.0.0--STABLE-blue?style=for-the-badge&logoColor=white)
-![Build](https://img.shields.io/badge/build-PASSING-green?style=for-the-badge)
-![Security](https://img.shields.io/badge/security-ENCRYPTED-red?style=for-the-badge)
+This repository contains the source code and research documentation for an MSc initiative focused on optimizing district heating systems through machine learning. By integrating real-time meteorological data with historical thermal patterns, the system provides high-precision energy demand forecasts to help plant operators improve efficiency and reduce carbon footprints.
 
-**TERRA-CORE** is a high-fidelity, industrial-grade heat demand prediction system designed for district heating optimization. It combines a sophisticated **Flask-based Machine Learning engine** with a cutting-edge **Next.js HUD (Heads-Up Display)** interface to deliver real-time meteorological analysis and thermal load forecasting.
+## Project Context and Objectives
 
----
-
-## 🛰️ System Architecture
-
-The project is architected as a decoupled full-stack application, prioritizing modularity, type safety, and low-latency data processing.
-
-### 🧠 Backend (Predictive Engine)
-- **Framework**: Flask (Python 3.x)
-- **Model Architecture**: Scikit-learn (Random Forest / Gradient Boosting)
-- **Data Logic**: Custom Feature Engineering service for multi-variable thermal analysis.
-- **API Strategy**: RESTful endpoints with synchronized CORS policy for secure frontend telemetry.
-
-### 🖥️ Frontend (HUD Interface)
-- **Core**: Next.js 15 (App Router) + React 19 + TypeScript
-- **Aesthetic**: Industrial HUD (Tactical Control Center) with monospaced typography and high-contrast telemetry visuals.
-- **State Management**: Global `DataProvider` context for synchronized telemetry across the matrix.
-- **Visuals**: Framer Motion (Micro-animations) + Recharts (Multispectral Charts).
+District heating involves large-scale thermal distribution where demand is highly sensitive to external variables such as temperature, wind chill, and building thermal mass. This project aims to:
+1. **Reduce Energy Waste**: By predicting demand 24-48 hours in advance, operators can modulate heat production more accurately, avoiding costly "peak-shaving" or overproduction.
+2. **Feature Engineering Research**: Investigating the impact of Heating Degree Hours (HDH) and temporal lags on prediction accuracy.
+3. **Operational HUD**: Providing a professional dashboard that translates complex ML metrics into actionable situational awareness.
 
 ---
 
-## ⚡ Technical Optimizations
+## System Capabilities
 
-This system is engineered for maximum operational efficiency:
+### 🧠 Machine Learning Engine
+The backend is powered by a **CatBoost** regressor, chosen for its superior handling of categorical temporal features and robust performance with non-linear thermal data.
+- **Feature Engineering**: The system automatically generates features like `HDH` (Heating Degree Hours), rolling temperature averages, and 3-hour/6-hour lags to capture the "thermal inertia" of buildings.
+- **RESTful API**: A Flask-based service serves predictions in milliseconds, with built-in CORS security and environment-aware configuration.
 
-- **Parallelized Inference**: Consolidates 48 individual hourly simulations into a single batch network request, reducing simulation latency by ~90%.
-- **Global Context Sync**: A centralized data provider eliminates redundant "on-mount" API waterfalls, ensuring snappy navigation between analytical nodes.
-- **TTL Service Caching**: Intelligent 5-minute in-memory buffering for meteorological data to minimize external API round-trips.
-- **Hydration Stabilization**: Engineered consistent server/client timestamp rendering to maintain UI integrity during high-frequency updates.
+### 🖥️ Analytical HUD
+The interface is a high-performance **Next.js 15** application designed for clarity and precision.
+- **Dashboard**: Real-time view of current weather, building specifications, and immediate heat demand.
+- **Weather Explorer**: Interactive charts for temperature, wind speed, and humidity trends.
+- **Prediction Matrix**: A 24-hour horizon view that allows operators to see the predicted "load ramp-up" for the following day.
+- **Validation Dashboard**: A transparency layer showing model R² scores, Mean Absolute Percentage Error (MAPE), and historical correlation between actual vs. predicted telemetry.
 
 ---
 
-## 🛠️ Deployment Configuration
+## Technology Stack
+
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend** | React 19, Next.js 15 (App Router), TypeScript, Tailwind CSS, Recharts, Framer Motion |
+| **Backend** | Python 3.10+, Flask, Gunicorn, CatBoost, Scikit-learn, joblib, Pandas |
+| **Infrastructure** | Azure Linux VM (Standard_B2ats_v2), Terraform, Nginx, PM2 |
+| **Security** | SSL/TLS (Certbot/Let's Encrypt), Azure NSG, Secure Environment Variables |
+
+---
+
+## Getting Started
 
 ### Prerequisites
-- **Python 3.9+**
-- **Node.js 18+**
-- **WeatherAPI.com Key** (Required for real-time telemetry)
+- **Python 3.9+** and **Node.js 18+** installed.
+- A free API key from [WeatherAPI.com](https://www.weatherapi.com/).
 
-### Intelligence Node (Backend) Setup
-1. `pip install -r requirements.txt`
-2. Configure environmental variables if necessary.
-3. `python src/api/app.py`
-   - *Default Port: 5000*
+### Installation
 
-### Analytical Node (Frontend) Setup
-1. `cd apps/frontend-simple`
-2. `npm install`
-3. Create `.env.local` with:
+1. **Clone and Backend Setup**
+   ```bash
+   git clone https://github.com/harmohanjohal/MSc_Research_Project.git
+   cd MSc_Research_Project/apps/backend
+   pip install -r requirements.txt
+   # Ensure model files (.pkl and .json) are present in this folder
+   python app.py
+   ```
+
+2. **Frontend Setup**
+   ```bash
+   cd ../frontend-simple
+   npm install
+   ```
+   Create a `.env.local` file:
    ```env
-   NEXT_PUBLIC_WEATHER_API_KEY=your_key_here
-   NEXT_PUBLIC_WEATHER_LOCATION=Nottingham,UK
+   NEXT_PUBLIC_WEATHER_API_KEY=your_weather_key
    NEXT_PUBLIC_API_URL=http://localhost:5000
    ```
-4. `npm run dev`
-   - *Default Port: 3000*
+   Launch the dashboard:
+   ```bash
+   npm run dev
+   ```
 
 ---
 
-## 📁 Project Vector Mapping
+## Deployment and Infrastructure
 
-```text
-root/
-├── apps/frontend-simple/    # Tactical HUD (Next.js)
-│   ├── src/providers/       # Global State Matrix
-│   ├── src/hooks/           # Optimized API Telemetry
-│   └── src/lib/             # Service & Logic Layer
-├── src/api/                 # Intelligence Core (Flask)
-│   ├── app.py               # Main Inference Gate
-│   └── services/            # Thermal Analysis Logic
-├── data/                    # Processed ML Models & Scalers
-└── config/                  # System Parameters
-```
+This project includes a complete **Terraform** configuration to deploy the stack to an Azure Virtual Machine. 
+
+- **Infrastructure as Code**: The `terraform/` directory defines the entire network, security group, and VM configuration.
+- **Automated Provisioning**: The `scripts/setup.sh` file handles the installation of Nginx, Node.js, and Python on the cloud instance during the first boot.
+- **Production Management**: Nginx acts as a reverse proxy, while PM2 ensures both the Next.js and Flask services remain online 24/7.
+
+For detailed deployment steps, including pointing your domain and SSL setup, refer to [deploy.md](./terraform/deploy.md).
 
 ---
 
-## 🛡️ Reliability Index
-The system includes built-in diagnostic tools located at `/test-weather` and `/manual-testing` to verify signal integrity and model response performance in real-time.
+## Project Structure
+
+- `apps/frontend-simple`: Next.js frontend code including the API hooks and UI components.
+- `apps/backend`: Flask API, ML model loading logic, and feature engineering service.
+- `data`: Serialized model files (`.pkl`), scalers, and metadata.
+- `terraform`: HCL files for Azure provisioning and server setup scripts.
+- `building_data`: Historical research data, processing scripts, and training notebooks.
 
 ---
 
-> [!NOTE]
-> This system is designed for district heating operators and thermal engineers. All telemetry is intended for situational awareness and predictive modeling purposes.
+**Disclaimer**: This project is part of a Master of Science (MSc) research program. The information provided is for analytical purposes and should not be used as the sole basis for physical plant operations without human verification.
