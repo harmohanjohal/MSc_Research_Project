@@ -1,4 +1,4 @@
-# TERRA-CORE: Heat Demand Prediction Matrix
+# Forecast Driven District Heating Control 
 
 ![Version](https://img.shields.io/badge/version-1.0.0--STABLE-blue?style=for-the-badge&logoColor=white)
 ![Build](https://img.shields.io/badge/build-PASSING-green?style=for-the-badge)
