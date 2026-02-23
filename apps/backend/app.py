@@ -77,6 +77,9 @@ def load_model_and_services() -> bool:
         traceback.print_exc()
         return False
 
+# Load model and services on startup
+load_model_and_services()
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """
