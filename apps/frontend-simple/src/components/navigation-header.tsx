@@ -1,8 +1,9 @@
 "use client"
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ArrowLeft, Thermometer } from 'lucide-react'
+import { ArrowLeft, Thermometer, AlertTriangle, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ApiStatus } from '@/components/ui/error-boundary'
 import { useApiConnection } from '@/hooks/useApi'
@@ -27,9 +28,41 @@ export function NavigationHeader({ title, showBackButton }: NavigationHeaderProp
   const shouldShowBackButton = showBackButton === true
   const pathname = usePathname()
   const { isConnected, lastCheck, checkConnection } = useApiConnection()
+  
+  const [showDisclaimer, setShowDisclaimer] = useState(true)
+
+  useEffect(() => {
+    const hasSeenDisclaimer = sessionStorage.getItem('hasSeenResearchDisclaimer')
+    if (hasSeenDisclaimer) {
+      setShowDisclaimer(false)
+    }
+  }, [])
+
+  const dismissDisclaimer = () => {
+    sessionStorage.setItem('hasSeenResearchDisclaimer', 'true')
+    setShowDisclaimer(false)
+  }
 
   return (
-    <header className="border-b border-primary/20 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 font-mono">
+    <div className="sticky top-0 z-50 flex flex-col">
+      {showDisclaimer && (
+        <div className="bg-amber-500/10 border-b border-amber-500/20 text-amber-200/90 text-xs px-4 py-2 flex items-start sm:items-center justify-between gap-4 font-mono w-full backdrop-blur-md">
+          <div className="flex items-start sm:items-center gap-2 max-w-7xl mx-auto w-full">
+            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+            <p className="flex-1 leading-relaxed">
+              <strong className="text-amber-400">RESEARCH PROJECT DISCLAIMER:</strong> This interface and its predictive models are part of an MSc research project. The district heating predictions provided are for demonstration and academic purposes only, and may contain inaccuracies. Do not use for actual physical plant control.
+            </p>
+            <button 
+              onClick={dismissDisclaimer}
+              className="p-1 hover:bg-amber-500/20 rounded text-amber-400 transition-colors shrink-0 flex items-center justify-center h-6 w-6"
+              aria-label="Dismiss warning"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+    <header className="border-b border-primary/20 bg-slate-950/80 backdrop-blur-md w-full font-mono">
       <div className="container mx-auto px-4 py-3 max-w-7xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -90,5 +123,6 @@ export function NavigationHeader({ title, showBackButton }: NavigationHeaderProp
         </nav>
       </div>
     </header>
+    </div>
   )
 }

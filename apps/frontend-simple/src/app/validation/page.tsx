@@ -91,7 +91,8 @@ export default function ValidationPage() {
       const modelData = await apiService.getModelInfo()
       setModelInfo(modelData)
 
-      const realMape = modelData.performance.test_mape_threshold ||
+      const realMape = modelData.performance.test_mape ||
+        modelData.performance.test_mape_threshold ||
         modelData.performance.test_mape_non_zero ||
         modelData.performance.test_smape ||
         22.54
