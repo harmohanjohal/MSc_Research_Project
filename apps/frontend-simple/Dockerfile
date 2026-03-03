@@ -12,6 +12,12 @@ RUN npm install --legacy-peer-deps
 # Copy full application code
 COPY . .
 
+# Build arguments for Next.js public variables (needed at build time)
+ARG NEXT_PUBLIC_WEATHER_API_KEY
+ARG NEXT_PUBLIC_WEATHER_LOCATION
+ENV NEXT_PUBLIC_WEATHER_API_KEY=$NEXT_PUBLIC_WEATHER_API_KEY
+ENV NEXT_PUBLIC_WEATHER_LOCATION=$NEXT_PUBLIC_WEATHER_LOCATION
+
 # Build the Next.js application
 ENV NODE_ENV=production
 RUN npm run build

@@ -99,6 +99,9 @@ jobs:
           push: true
           tags: ghcr.io/${{ env.NAME }}-frontend:latest
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_WEATHER_API_KEY=${{ secrets.NEXT_PUBLIC_WEATHER_API_KEY }}
+            NEXT_PUBLIC_WEATHER_LOCATION=${{ secrets.NEXT_PUBLIC_WEATHER_LOCATION }}
 
   deploy:
     name: Deploy to Server
