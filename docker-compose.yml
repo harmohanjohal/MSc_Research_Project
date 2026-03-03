@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  backend:
+    image: ghcr.io/${GHCR_USERNAME:-harmohanjohal}/heat-prediction-backend:latest
+    container_name: heat-prediction-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+
+  frontend:
+    image: ghcr.io/${GHCR_USERNAME:-harmohanjohal}/heat-prediction-frontend:latest
+    container_name: heat-prediction-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - backend
