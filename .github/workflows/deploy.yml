@@ -50,18 +50,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
 
+      - name: Lowercase Repository Name
+        id: repo
+        run: echo "NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}-backend
+          images: ghcr.io/${{ env.NAME }}-backend
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: ./apps/backend
           push: true
-          tags: ghcr.io/${{ github.repository }}-backend:latest
+          tags: ghcr.io/${{ env.NAME }}-backend:latest
           labels: ${{ steps.meta.outputs.labels }}
 
   build-frontend:
@@ -78,18 +82,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
 
+      - name: Lowercase Repository Name
+        id: repo
+        run: echo "NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}-frontend
+          images: ghcr.io/${{ env.NAME }}-frontend
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: ./apps/frontend-simple
           push: true
-          tags: ghcr.io/${{ github.repository }}-frontend:latest
+          tags: ghcr.io/${{ env.NAME }}-frontend:latest
           labels: ${{ steps.meta.outputs.labels }}
 
   deploy:
