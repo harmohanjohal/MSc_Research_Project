@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 
 # Install all dependencies (including devDependencies for build)
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy full application code
 COPY . .
@@ -17,7 +17,7 @@ ENV NODE_ENV=production
 RUN npm run build
 
 # Stage 2: Production image
-FROM node:18-alpine AS runner
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
