@@ -1,6 +1,6 @@
 # Forecast Driven District Heating Control
 
-This repository contains the source code and research documentation for an MSc initiative focused on optimizing district heating systems through machine learning. By integrating real-time meteorological data with historical thermal patterns, the system provides high-precision energy demand forecasts to help plant operators improve efficiency and reduce carbon footprints.
+This repository contains the source code and research documentation for an MSc initiative focused on optimizing district heating systems through machine learning.
 
 ## Project Context and Objectives
 
@@ -35,6 +35,55 @@ The interface is a high-performance **Next.js 15** application designed for clar
 | **Backend** | Python 3.10+, Flask, Gunicorn, CatBoost, Scikit-learn, joblib, Pandas |
 | **Infrastructure** | Azure Linux VM (Standard_B2ats_v2), Terraform, Nginx, PM2 |
 | **Security** | SSL/TLS (Certbot/Let's Encrypt), Azure NSG, Secure Environment Variables |
+
+---
+
+## System Architecture & Data Flow
+
+```mermaid
+graph TD
+    subgraph "External Systems"
+        WA[WeatherAPI.com]
+    end
+
+    subgraph "Azure Virtual Machine (Production)"
+        subgraph "Frontend Layer (Next.js)"
+            UI[User Dashboard]
+            DH[Data Hooks / useApi]
+            DP[Global Data Provider]
+        end
+
+        subgraph "Backend Layer (Flask)"
+            API[REST API Entry]
+            FS[Feature Service]
+            ML[CatBoost Model]
+            SC[Robust Scaler]
+        end
+
+        NG[Nginx Reverse Proxy]
+    end
+
+    WA -- "Meteorological Telemetry" --> DH
+    UI -- "Action/Request" --> DH
+    DH -- "State Update" --> DP
+    DP -- "Visual Feedback" --> UI
+
+    DH -- "HTTPS /api/*" --> NG
+    NG -- "Internal Route" --> API
+    API -- "Raw Data" --> FS
+    FS -- "Engineered Features" --> SC
+    SC -- "Scaled Vector" --> ML
+    ML -- "Demand Prediction (kW)" --> API
+    API -- "JSON Response" --> NG
+    NG -- "Data Delivery" --> DH
+```
+
+### Technical Workflow
+1.  **Meteorological Acquisition**: The frontend fetches real-time meteorological data via the `useWeather` hook.
+2.  **Inference Sequence**: When a prediction is requested, the telemetry is sent to the Flask backend.
+3.  **Feature Engineering**: The backend `FeatureService` processes raw data into engineered features (HDH, Lags).
+4.  **Model Scoring**: Features are normalized by the `RobustScaler` and scored by the `CatBoost` model.
+5.  **Visualization**: The result is returned as JSON and rendered in the dashboard using Recharts.
 
 ---
 
