@@ -1,0 +1,21 @@
+digraph G {
+  rankdir = "RL";
+  node [shape = rect, fontname = "sans-serif"];
+  "azurerm_linux_virtual_machine.vm" [label="azurerm_linux_virtual_machine.vm"];
+  "azurerm_network_interface.nic" [label="azurerm_network_interface.nic"];
+  "azurerm_network_security_group.nsg" [label="azurerm_network_security_group.nsg"];
+  "azurerm_public_ip.public_ip" [label="azurerm_public_ip.public_ip"];
+  "azurerm_resource_group.rg" [label="azurerm_resource_group.rg"];
+  "azurerm_subnet.subnet" [label="azurerm_subnet.subnet"];
+  "azurerm_subnet_network_security_group_association.subnet_nsg_assoc" [label="azurerm_subnet_network_security_group_association.subnet_nsg_assoc"];
+  "azurerm_virtual_network.vnet" [label="azurerm_virtual_network.vnet"];
+  "azurerm_linux_virtual_machine.vm" -> "azurerm_network_interface.nic";
+  "azurerm_network_interface.nic" -> "azurerm_public_ip.public_ip";
+  "azurerm_network_interface.nic" -> "azurerm_subnet.subnet";
+  "azurerm_network_security_group.nsg" -> "azurerm_resource_group.rg";
+  "azurerm_public_ip.public_ip" -> "azurerm_resource_group.rg";
+  "azurerm_subnet.subnet" -> "azurerm_virtual_network.vnet";
+  "azurerm_subnet_network_security_group_association.subnet_nsg_assoc" -> "azurerm_network_security_group.nsg";
+  "azurerm_subnet_network_security_group_association.subnet_nsg_assoc" -> "azurerm_subnet.subnet";
+  "azurerm_virtual_network.vnet" -> "azurerm_resource_group.rg";
+}
