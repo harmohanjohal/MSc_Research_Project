@@ -118,7 +118,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "docker-compose.yml"
-          target: "/var/www/heat-prediction"
+          target: ""
           rm: false
 
       - name: Execute deployment script on VM
@@ -132,15 +132,14 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: GHCR_PAT,GITHUB_ACTOR
           script: |
-            cd /var/www/heat-prediction
             echo "Starting deployment..."
+            
+            # Move the uploaded file from home to the web directory
+            sudo mv ~/docker-compose.yml /var/www/heat-prediction/docker-compose.yml
+            cd /var/www/heat-prediction
             
             # Login to GHCR to pull private packages (if repo is private)
             echo "$GHCR_PAT" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-            
-            # Stop existing PM2 processes if they exist
-            pm2 stop all || true
-            pm2 delete all || true
             
             # Export username for docker-compose interpolation
             export GHCR_USERNAME=$GITHUB_ACTOR
