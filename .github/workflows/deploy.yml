@@ -118,7 +118,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "docker-compose.yml"
-          target: ""
+          target: "/home/azureuser"
           rm: false
 
       - name: Execute deployment script on VM
