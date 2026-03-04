@@ -111,6 +111,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Copy docker-compose to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "docker-compose.yml"
+          target: "/home/azureuser"
+          rm: false
+
       - name: Execute deployment script on VM
         uses: appleboy/ssh-action@v1.0.3
         env:
@@ -124,44 +134,28 @@ jobs:
           script: |
             echo "Starting deployment..."
             
-            mkdir -p /var/www/heat-prediction
+            # Find the uploaded docker-compose.yml directly (SCP wraps it in folders sometimes)
+            COMPOSE_FILE=$(find /home/azureuser -name "docker-compose.yml" -type f | head -n 1)
+            if [ -n "$COMPOSE_FILE" ]; then
+              sudo mv "$COMPOSE_FILE" /var/www/heat-prediction/docker-compose.yml
+            else
+              echo "Error: docker-compose.yml not found!"
+              exit 1
+            fi
+            
             cd /var/www/heat-prediction
             
-            # Create docker-compose.yml directly on the server to bypass SCP issues
-            cat > docker-compose.yml << 'EOF'
-            version: '3.8'
-            services:
-              backend:
-                image: ghcr.io/${GHCR_USERNAME}/msc_research_project-backend:latest
-                container_name: heat-prediction-backend
-                restart: always
-                ports:
-                  - "5000:5000"
-                environment:
-                  - FLASK_ENV=production
-                  
-              frontend:
-                image: ghcr.io/${GHCR_USERNAME}/msc_research_project-frontend:latest
-                container_name: heat-prediction-frontend
-                restart: always
-                ports:
-                  - "3000:3000"
-                depends_on:
-                  - backend
-            EOF
-            
-            
             # Login to GHCR to pull private packages (if repo is private)
-            echo "$GHCR_PAT" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+            echo "$GHCR_PAT" | sudo docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
             
             # Export username for docker-compose interpolation
             export GHCR_USERNAME=$GITHUB_ACTOR
             
-            # Pull latest images and restart containers
-            docker-compose pull
-            docker-compose up -d
+            # Pull latest images and restart containers (Using native v2 syntax)
+            sudo docker compose pull
+            sudo docker compose up -d
             
             # Cleanup old dangling images to save disk space
-            docker image prune -f
+            sudo docker image prune -f
             
             echo "Deployment successful!"
