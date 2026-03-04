@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    image: ghcr.io/${GHCR_USERNAME:-harmohanjohal}/heat-prediction-backend:latest
+    image: ghcr.io/harmohanjohal/msc_research_project-backend:latest
     container_name: heat-prediction-backend
     restart: always
     ports:
@@ -11,7 +11,7 @@ services:
       - FLASK_ENV=production
 
   frontend:
-    image: ghcr.io/${GHCR_USERNAME:-harmohanjohal}/heat-prediction-frontend:latest
+    image: ghcr.io/harmohanjohal/msc_research_project-frontend:latest
     container_name: heat-prediction-frontend
     restart: always
     ports:
