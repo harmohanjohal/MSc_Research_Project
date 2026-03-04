@@ -134,8 +134,15 @@ jobs:
           script: |
             echo "Starting deployment..."
             
-            # Move the uploaded file from home to the web directory
-            sudo mv ~/docker-compose.yml /var/www/heat-prediction/docker-compose.yml
+            # Find the uploaded docker-compose.yml directly (SCP sometimes wraps it in folders)
+            COMPOSE_FILE=$(find /home/azureuser -name "docker-compose.yml" -type f | head -n 1)
+            if [ -n "$COMPOSE_FILE" ]; then
+              sudo mv "$COMPOSE_FILE" /var/www/heat-prediction/docker-compose.yml
+            else
+              echo "Error: docker-compose.yml not found!"
+              exit 1
+            fi
+            
             cd /var/www/heat-prediction
             
             # Login to GHCR to pull private packages (if repo is private)
