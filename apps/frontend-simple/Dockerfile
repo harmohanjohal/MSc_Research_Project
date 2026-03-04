@@ -23,6 +23,8 @@ ENV NEXT_PUBLIC_WEATHER_LOCATION=$NEXT_PUBLIC_WEATHER_LOCATION
 
 # Build the Next.js application
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max_old_space_size=4096"
 RUN npm run build
 
 # Stage 2: Production image
