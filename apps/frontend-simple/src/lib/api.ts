@@ -62,7 +62,7 @@ class ApiService {
   private retryDelay: number = 1000
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000'
+    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '' : 'http://127.0.0.1:5000')
   }
 
   // Retry wrapper for API calls
